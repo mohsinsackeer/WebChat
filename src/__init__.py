@@ -56,9 +56,10 @@ def create_app():
             return User.query.get(int(user_id))
         
         from src.auth import auth
+        from src.chat import chat
         
         app.register_blueprint(auth, url_prefix='/')
-        # app.register_blueprint(views, url_prefix='/')
+        app.register_blueprint(chat, url_prefix='/')
 
     return app
 

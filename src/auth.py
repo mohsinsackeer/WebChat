@@ -1,4 +1,3 @@
-import flask
 from flask import Blueprint, render_template, redirect, url_for, session, request
 from flask_login import login_user, logout_user, login_required
 from src import User, db
@@ -40,7 +39,8 @@ def login_submit():
     
     session.pop('username', None)
     login_user(user, remember=remember)
-    return 'Success'
+    #return 'Success'
+    return redirect(url_for('chat.chats'))
 
 
 @auth.route('/signup_submit', methods=['POST'])
