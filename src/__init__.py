@@ -43,11 +43,11 @@ def create_app():
     with app.app_context():
         db.init_app(app)
         login_manager = LoginManager()
-        login_manager.login_view = 'auth.login_post'
+        login_manager.login_view = 'auth.login_page'
         login_manager.init_app(app)
 
         # Create the following statement to retain the value in database
-        db.drop_all()
+        #db.drop_all()
 
         db.create_all()
 

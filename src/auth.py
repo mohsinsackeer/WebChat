@@ -25,7 +25,7 @@ def login_submit():
     error_msg = None
     username = request.form['username']
     entered_password = request.form['password']
-    # remember = True if request.form['remember'] else False
+    remember = True if request.form.get('remember', False) else False
 
     if not username or not entered_password:
         error_msg = "Missing Data"
@@ -39,7 +39,7 @@ def login_submit():
                                 error_msg=error_msg)
     
     session.pop('username', None)
-    login_user(user)
+    login_user(user, remember=remember)
     return 'Success'
 
 
