@@ -1,6 +1,6 @@
 import flask
 from flask import Blueprint, render_template, redirect, url_for, session, request
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required
 from src import User, db
 
 auth = Blueprint('auth', __name__)
@@ -78,3 +78,10 @@ def signup_submit():
     login_user(u)
 
     return 'Success!'
+
+@auth.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    session.pop('username', None)
+    return redirect(url_for('auth.login_page'))
