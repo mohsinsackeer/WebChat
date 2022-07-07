@@ -1,0 +1,46 @@
+{% extends 'auth/base_authentication.html' %}
+
+{% block body %}
+
+<h1>Sign Up Here</h1>
+
+<form action="/signup_submit", method="post">
+
+    <table>
+
+        <tr>
+            <td><p>Full Name :</p></td>
+            <td><input type="text" name="name"></td>
+        </tr>
+
+        <tr>
+            <td><p>Username :</p></td>
+            <td><input type="text" name="username"></td>
+        </tr>
+
+        <tr>
+            <td><p>Email :</p></td>
+            <td><input type="email" name="email"></td>
+        </tr>
+
+        <tr hidden>
+            <td><p>Photo :</p></td>
+            <td><p>to be implemented</p></td>
+        </tr>
+
+        <tr>
+            <td>Password :</td>
+            <td><input type="password" name="password"></td>
+        </tr>
+    </table>
+
+    <p><span class="error">{{ error_msg }}</span></p>
+    <p><button type="submit">Submit</button></p>
+
+</form>
+
+<div>
+    <p>Already Have An Account? <span><a href="{{ url_for('auth.login_page') }}">Login</a></span> Here!</p>
+</div>
+
+{% endblock body %}

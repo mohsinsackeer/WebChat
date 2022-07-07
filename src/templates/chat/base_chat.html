@@ -1,0 +1,31 @@
+<!doctype html>
+
+<html>
+
+    <head>
+        <title>{{ the_title }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    </head>
+
+    <body>
+        
+        <div class="chat-screen">
+
+            <div class="contacts-section" name="contacts-section" id="contacts-section">
+                {% block contacts %}
+                {% endblock contacts %}
+            </div>
+
+            <div class="chat-section" name="chat-section" id="chat-section">
+                {% block chat %}
+                {% endblock chat %}
+            </div>
+
+        </div>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+        
+    </body>
+
+</html>

@@ -1,0 +1,124 @@
+/* Styling Primarily For Authorization Sections*/
+.error{
+    color: red;
+}
+
+/* Styling Primarily For Chat Sections*/
+.chat-screen{
+    width: 865px;
+    height: 775px;
+    float: none;
+}
+
+.contacts-section{
+    float: left;
+    width: 200px;
+    border: 3px dashed black;
+    height: 775px;
+}
+
+.chat-section{
+    float: right;
+    width: 650px;
+    border: 3px dashed black;
+    height: 775px;
+}
+
+.contacts-header, .chat-header{
+    height: 35px;
+    background-color: wheat;
+    padding: 10px;
+    text-align: center;
+    color: purple;
+}
+
+.div-search-username{
+    background-color: lightgreen;
+    padding: 10px;
+}
+
+.scroll-div-existing-contacts{
+    padding: 4px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /*text-align: justify;*/
+}
+
+.scroll-div-existing-contacts div{
+    padding: 4px;
+}
+
+.scroll-div-existing-contacts div:nth-child(odd){
+    background-color: bisque;
+}
+
+.scroll-div-existing-contacts div:nth-child(even){
+    background-color: goldenrod;
+}
+
+.scroll-div-existing-contacts img{
+    width: 50px;
+    height: 50px;
+}
+
+.scroll-div-existing-contacts p{
+    float: right;
+    text-align: center;
+}
+
+
+.div-chat-name{
+    height: 60px;
+    padding: 5px;
+    background-color: lightgreen;
+    color: black;
+}
+
+.div-chat-name img{
+    width: 50px;
+    height: 50px;
+}
+
+.div-chat-name p{
+    float: right;
+    width: 150px;
+}
+
+.div-chat-window{
+    height: 600px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /*background-image: url('https://theabbie.github.io/blog/assets/official-whatsapp-background-image.jpg');*/
+    background-color: #c3dfe0
+}
+
+.div-message-type{
+    color: black;
+}
+
+form{
+    background: rgba(0, 0, 0, 0.15);
+    padding: 5px;
+    flex-grow: 1;
+    border-radius: 2em;
+    margin: 0.25em;
+}
+
+form input{
+    height: 20px;
+    width: 480px;
+    border: none; padding: 2px; flex-grow: 1; border-radius: 2rem; margin: 0.25rem;
+}
+
+form input:focus{ outline: none; }
+
+form button {
+    height: 20px;
+    width: 100px;
+    background: #333;
+    border: none;
+    padding: 0 1rem;
+    margin: 0.25rem;
+    border-radius: 3px;
+    outline: none;
+    color: #fff; }
