@@ -70,7 +70,7 @@
 .div-chat-name{
     height: 60px;
     padding: 5px;
-    background-color: lightgreen;
+    background-color: #128C7E;
     color: black;
 }
 
@@ -147,18 +147,39 @@ form button {
 
     list-style-type: none;
     padding-inline-start: 0px;
-    float: right;
+    /* float: right; */
     margin-right: 20px;
-    text-align: -webkit-right;
+    /* text-align: -webkit-right; */
 
 }
 
 .messages > li{
-    width: fit-content;
-    padding: 5px;
-    height: 20px;
+    width: 634px;
+    /* max-width: 275px; */
+    height: fit-content;
+    padding: 10px;
+    min-height: 20px;
+    height: fit-content;
     margin-top: 10px;
-    background-color: aquamarine;
+    text-overflow: ellipsis;
+    vertical-align: auto;
+}
+
+.messages li.received{
+    text-align: left;
+    background-color: aliceblue;
+    margin-right:50%;
+}
+
+.messages li.sent{
+    text-align: right;
+    background-color: #25D366;
+}
+
+span.sender-username{
+    color: black;
+    font-weight: bold;
+    font-size: small;
 }
 
 .chat-input{

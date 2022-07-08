@@ -24,8 +24,17 @@ var main = function(){
 
         if(msg_text.val()!=''){
             msgArray.push(msg_text.val())
+            var li = $('<li>').text(msg_text.val());
+            var span = $('<span>').text('mohsinsackeer: ');
+            span.addClass('sender-username');
+            li.prepend(span);
+            li.addClass('received');
+            messages.append(li);
+
+            msgArray.push(msg_text.val())
             var li = $('<li>');
             li.text(msg_text.val());
+            li.addClass('sent');
             messages.append(li);
             msg_text.val('');
         }
