@@ -14,12 +14,24 @@ var main = function(){
         list.append(li);
     });
 
-    var send = $('#send_bt');
+    var send_btn = document.getElementById('send_bt');
     var msg_text =$('#msg_input');
     var msgArray =[];
     var messages = $('#messages');
 
+    send_btn.addEventListener("click", function(event){
+        event.preventDefault();
 
+        if(msg_text.val()!=''){
+            msgArray.push(msg_text.val())
+            var li = $('<li>');
+            li.text(msg_text.val());
+            messages.append(li);
+            msg_text.val('');
+        }
+    });
+
+    /*
     send.on('click',function(){
         if(msg_text.val()!=''){
             msgArray.push(msg_text.val())
@@ -29,6 +41,7 @@ var main = function(){
             msg_text.val('');
         }
     });
+    */
 };
 
 

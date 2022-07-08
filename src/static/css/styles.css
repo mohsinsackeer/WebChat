@@ -108,7 +108,7 @@ form{
 
 form input{
     height: 20px;
-    width: 480px;
+    width: 400px;
     border: none; padding: 2px; flex-grow: 1; border-radius: 2rem; margin: 0.25rem;
 }
 
@@ -162,7 +162,7 @@ form button {
 }
 
 .chat-input{
-    width:100%;
+    width:75%;
 }
 .send_bt{
     background-color: green;
