@@ -17,7 +17,7 @@ In the actual application, we should add the existing
 contacts from the database, and dynamically placed here by AJAX-->
 
 <div class="scroll-div-existing-contacts">
-    <div class="contact">
+    <!-- <div class="contact">
         <img src="https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png" alt="contact_image">
         <p class="name">Mohsin</p>
     </div>
@@ -28,8 +28,10 @@ contacts from the database, and dynamically placed here by AJAX-->
     <div class="contact">
         <img src="https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png" alt="contact_image">
         <p class="name">Krishnathejus</p>
-    </div>
-</div>
+    </div>-->
+    <ul class ="chat-list" id ="chat-list"></ul>
+</div> 
+
 
 {% endblock contacts %}
 
@@ -59,14 +61,17 @@ contacts from the database, and dynamically placed here by AJAX-->
 </div>
 
 <div class="div-chat-window">
-    <h1>-->chats will be displayed here--<</h1>
+    <ul class ="messages" id ="messages"></ul>
 </div>
 
 <div class="div-message-type">
-    <form action="" method="post">
-        <input type="text" name="text-message">
-        <button type="submit">Send</button>
-    </form>
+    
+        <input class="chat-input" type="text" name="text-message" id ="msg_input">
+        <button  class="send_bt" id ="send_bt">Send</button>
+    
 </div>
 
 {% endblock chat %}
+
+
+

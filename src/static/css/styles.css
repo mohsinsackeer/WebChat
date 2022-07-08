@@ -62,7 +62,7 @@
 }
 
 .scroll-div-existing-contacts p{
-    float: right;
+    /* float: right; */
     text-align: center;
 }
 
@@ -93,6 +93,8 @@
 }
 
 .div-message-type{
+    width: auto;
+    display: flex;
     color: black;
 }
 
@@ -121,4 +123,50 @@ form button {
     margin: 0.25rem;
     border-radius: 3px;
     outline: none;
-    color: #fff; }
+    color: #fff; 
+}
+    
+.chat-list{
+    list-style-type: none;
+    width:100%;
+    border-bottom:2 px solid #000;
+    padding-inline-start: 0px;
+}
+.chat-list > li{
+    color:red;
+    font-size: 20px;
+    background-color: blanchedalmond;
+    
+    
+}
+.check_class{
+    background-color: green;
+
+}
+.messages{
+
+    list-style-type: none;
+    padding-inline-start: 0px;
+    float: right;
+    margin-right: 20px;
+    text-align: -webkit-right;
+
+}
+
+.messages > li{
+    width: fit-content;
+    padding: 5px;
+    height: 20px;
+    margin-top: 10px;
+    background-color: aquamarine;
+}
+
+.chat-input{
+    width:100%;
+}
+.send_bt{
+    background-color: green;
+    color: #fff;
+    margin: 0 20px 0 20px;
+    font-size: 20px;
+}
