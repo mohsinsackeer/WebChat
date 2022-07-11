@@ -10,7 +10,7 @@ var main = function(){
 
         text_msg = $("#input").val();
         console.log(text_msg);
-        socket.emit('send message', {message : text_msg})
+        socket.emit('send message', {message : text_msg});
         $("#input").val("");
     });
 

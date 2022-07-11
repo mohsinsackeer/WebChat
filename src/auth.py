@@ -39,6 +39,7 @@ def login_submit():
     
     session.pop('username', None)
     login_user(user, remember=remember)
+    session['username'] = username
     #return 'Success'
     return redirect(url_for('chat.chats'))
 
@@ -76,7 +77,7 @@ def signup_submit():
     db.session.add(u)
     db.session.commit()
     login_user(u)
-
+    session['username'] = username
     return 'Success!'
 
 @auth.route('/logout')
