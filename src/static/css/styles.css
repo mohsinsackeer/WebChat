@@ -70,11 +70,16 @@
 .div-chat-name{
     height: 60px;
     padding: 5px;
-    background-color: lightgreen;
+    background-color: #128C7E;
     color: black;
 }
 
 .div-chat-name img{
+    width: 0;
+    height: 0;
+}
+
+.div-chat-name img.profile-pic{
     width: 50px;
     height: 50px;
 }
@@ -86,6 +91,7 @@
 
 .div-chat-window{
     height: 600px;
+    width: inherit;
     overflow-x: hidden;
     overflow-y: auto;
     /*background-image: url('https://theabbie.github.io/blog/assets/official-whatsapp-background-image.jpg');*/
@@ -108,7 +114,7 @@ form{
 
 form input{
     height: 20px;
-    width: 480px;
+    width: 400px;
     border: none; padding: 2px; flex-grow: 1; border-radius: 2rem; margin: 0.25rem;
 }
 
@@ -132,13 +138,14 @@ form button {
     border-bottom:2 px solid #000;
     padding-inline-start: 0px;
 }
+
 .chat-list > li{
     color:red;
     font-size: 20px;
     background-color: blanchedalmond;
-    
-    
+    cursor: pointer;
 }
+
 .check_class{
     background-color: green;
 
@@ -147,22 +154,43 @@ form button {
 
     list-style-type: none;
     padding-inline-start: 0px;
-    float: right;
+    /* float: right; */
     margin-right: 20px;
-    text-align: -webkit-right;
+    /* text-align: -webkit-right; */
 
 }
 
 .messages > li{
-    width: fit-content;
-    padding: 5px;
-    height: 20px;
+    width: 634px;
+    /* max-width: 275px; */
+    height: fit-content;
+    padding: 10px;
+    min-height: 20px;
+    height: fit-content;
     margin-top: 10px;
-    background-color: aquamarine;
+    text-overflow: ellipsis;
+    vertical-align: auto;
+}
+
+.messages li.received{
+    text-align: left;
+    background-color: aliceblue;
+    margin-right:50%;
+}
+
+.messages li.sent{
+    text-align: right;
+    background-color: #25D366;
+}
+
+span.sender-username{
+    color: black;
+    font-weight: bold;
+    font-size: small;
 }
 
 .chat-input{
-    width:100%;
+    width:75%;
 }
 .send_bt{
     background-color: green;
