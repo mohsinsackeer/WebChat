@@ -75,6 +75,11 @@
 }
 
 .div-chat-name img{
+    width: 0;
+    height: 0;
+}
+
+.div-chat-name img.profile-pic{
     width: 50px;
     height: 50px;
 }
@@ -86,6 +91,7 @@
 
 .div-chat-window{
     height: 600px;
+    width: inherit;
     overflow-x: hidden;
     overflow-y: auto;
     /*background-image: url('https://theabbie.github.io/blog/assets/official-whatsapp-background-image.jpg');*/
@@ -132,13 +138,14 @@ form button {
     border-bottom:2 px solid #000;
     padding-inline-start: 0px;
 }
+
 .chat-list > li{
     color:red;
     font-size: 20px;
     background-color: blanchedalmond;
-    
-    
+    cursor: pointer;
 }
+
 .check_class{
     background-color: green;
 

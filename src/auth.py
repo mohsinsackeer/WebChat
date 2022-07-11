@@ -78,7 +78,7 @@ def signup_submit():
     db.session.commit()
     login_user(u)
     session['username'] = username
-    return 'Success!'
+    return redirect(url_for('chat.chats'))
 
 @auth.route('/logout')
 @login_required
