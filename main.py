@@ -1,3 +1,4 @@
+from distutils.log import debug
 import socketio
 from src import create_app, User
 from flask import request, session
@@ -56,5 +57,6 @@ def handle_message(data):
 
 
 if __name__ == '__main__':
-    #app.run(debug=True)
+    # app.run(debug=True)
+    # socketio.run(app, port='80', host='0.0.0.0')
     socketio.run(app, debug=True)
