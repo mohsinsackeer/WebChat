@@ -1,3 +1,4 @@
+
 var main = function(){
     console.log('chat.js is active!');
 
@@ -33,7 +34,7 @@ var main = function(){
 
         var list = $('#chat-list');
         list.empty();
-        var str = "https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png"
+        var str = "";
         
         list_of_users.forEach(function(user){
             all_usernames.push(user.username);
@@ -41,8 +42,8 @@ var main = function(){
 
                 var li = $('<li>');
                 var div = $('<div>');
-                div.addClass("check_class");
-                div.prepend('<img src = "'+ str +'"  alt="contact_image">');
+                div.addClass("contacts-listitem");
+                div.prepend('<div class = demo-image></div>'); //to be changed later
                 div.append('<span >'+ user.name +'</span>');
                 li.append(div);
                 li.addClass(user.username);
@@ -51,10 +52,11 @@ var main = function(){
                 $("#chat-list").on('click', 'li.'+user.username, function(){
                     console.log(user.username);
 
-                    $(".div-chat-name p").text(user.name);
-                    $(".div-chat-name img").attr("src", str);
-                    $(".div-chat-name img").attr("alt", "friend's profile image");
-                    $(".div-chat-name img").addClass("profile-pic");
+                    $(".div-chat-name span").text(user.name);
+                    $(".div-chat-name div").addClass("demo-image");
+                    // $(".div-chat-name img").attr("src", str);
+                    // $(".div-chat-name img").attr("alt", "friend's profile image");
+                    // $(".div-chat-name img").addClass("profile-pic");
                     $('.messages').empty();
                     receiver = user.username;
                 });
@@ -67,7 +69,7 @@ var main = function(){
         if (data.from !== receiver) { return; }
         console.log(data.message);
         var li = $('<li>');
-        li.text(data.message);
+        li.append('<div class = div-received> <p >'+ data.message +'</p> </div>');
         li.addClass('received');
         messages.append(li);
     });
@@ -94,7 +96,7 @@ var main = function(){
             //msgArray.push(msg_text.val())
             var li = $('<li>');
             var msg = msg_text.val();
-            li.text(msg);
+            li.append('<div class = div-sent> <p >'+ msg +'</p> </div>');
             li.addClass('sent');
             messages.append(li);
             

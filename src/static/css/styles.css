@@ -4,24 +4,24 @@
 }
 
 /* Styling Primarily For Chat Sections*/
+body{
+    margin: 0px;
+}
 .chat-screen{
-    width: 865px;
-    height: 775px;
-    float: none;
+    width: 100%;
+    height: 100%;
+    display: flex;
 }
 
 .contacts-section{
-    float: left;
-    width: 200px;
-    border: 3px dashed black;
-    height: 775px;
+    width: 300px;
+    height: 100%;
 }
 
 .chat-section{
     float: right;
-    width: 650px;
-    border: 3px dashed black;
-    height: 775px;
+    width: 100%;
+    height: 100%;
 }
 
 .contacts-header, .chat-header{
@@ -38,22 +38,9 @@
 }
 
 .scroll-div-existing-contacts{
-    padding: 4px;
     overflow-x: hidden;
     overflow-y: auto;
     /*text-align: justify;*/
-}
-
-.scroll-div-existing-contacts div{
-    padding: 4px;
-}
-
-.scroll-div-existing-contacts div:nth-child(odd){
-    background-color: bisque;
-}
-
-.scroll-div-existing-contacts div:nth-child(even){
-    background-color: goldenrod;
 }
 
 .scroll-div-existing-contacts img{
@@ -70,8 +57,10 @@
 .div-chat-name{
     height: 60px;
     padding: 5px;
-    background-color: #128C7E;
-    color: black;
+    align-items: center;
+    display: flex;
+    background-color: green;
+    color: #fff;
 }
 
 .div-chat-name img{
@@ -84,17 +73,17 @@
     height: 50px;
 }
 
-.div-chat-name p{
-    float: right;
-    width: 150px;
+.div-chat-name span{
+    margin-left: 10px;
+    font-size: 20px;
+    font-weight: 600;
 }
 
 .div-chat-window{
-    height: 600px;
+    height: calc(100vh - 137px);
     width: inherit;
     overflow-x: hidden;
     overflow-y: auto;
-    /*background-image: url('https://theabbie.github.io/blog/assets/official-whatsapp-background-image.jpg');*/
     background-color: #c3dfe0
 }
 
@@ -137,36 +126,42 @@ form button {
     width:100%;
     border-bottom:2 px solid #000;
     padding-inline-start: 0px;
+    margin-block-start: 0;
+    margin-block-end: 0;
 }
 
 .chat-list > li{
     color:red;
     font-size: 20px;
-    background-color: blanchedalmond;
+    border-bottom: 2px solid rgb(203, 203, 203);
     cursor: pointer;
+    padding: 12px;
 }
 
-.check_class{
-    background-color: green;
+.contacts-listitem{
+    display: flex;
+    align-items: center;
 
+}
+.contacts-listitem span{
+    color: black;
+    margin-left: 10px;
 }
 .messages{
 
     list-style-type: none;
     padding-inline-start: 0px;
-    /* float: right; */
+    margin-left: 20px;
     margin-right: 20px;
-    /* text-align: -webkit-right; */
+    
 
 }
 
 .messages > li{
-    width: 634px;
-    /* max-width: 275px; */
     height: fit-content;
-    padding: 10px;
     min-height: 20px;
     height: fit-content;
+    display: flow-root;
     margin-top: 10px;
     text-overflow: ellipsis;
     vertical-align: auto;
@@ -174,13 +169,44 @@ form button {
 
 .messages li.received{
     text-align: left;
-    background-color: aliceblue;
-    margin-right:50%;
 }
 
 .messages li.sent{
     text-align: right;
-    background-color: #25D366;
+    
+}
+.div-sent{
+    background-color: rgb(96, 178, 96);
+    float: right;
+    color: #000;
+    padding-right: 10px;
+    padding-left: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  
+}
+
+.div-sent p{
+    margin: 0px;
+    word-break: break-all;
+    max-width: 250px;
+}
+.div-received p{
+    margin: 0px;
+    word-break: break-all;
+    max-width: 250px;
+}
+
+
+.div-received{
+    background-color: aliceblue;
+    float: left;
+    color: #000;
+    padding-left: 10px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
 }
 
 span.sender-username{
@@ -197,4 +223,25 @@ span.sender-username{
     color: #fff;
     margin: 0 20px 0 20px;
     font-size: 20px;
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar{
+    width: 3px;
+    background-color: transparent;
+}
+::-webkit-scrollbar-thumb{
+    width: 3px;
+    height: 3px;
+    color:#7c7c7c
+}
+
+/* to be removed later */
+
+.demo-image{
+    width: 25px;
+    height: 25px;
+    background-color:yellow;
+    border-radius: 100%;
+    padding: 12px;
 }
