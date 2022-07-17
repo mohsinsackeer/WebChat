@@ -1,9 +1,9 @@
-from distutils.log import debug
 import socketio
-from src import create_app, User
-from flask import request, session
+from src import create_app, User, Messages, db
+from flask import request
 from flask_socketio import SocketIO
 import flask_login
+from sqlalchemy import or_, and_
 
 app = create_app()
 app.config['SECRET KEY'] = 'ThisTheIsKeySecret'
@@ -12,7 +12,7 @@ socketio = SocketIO(app)
 
 @socketio.on('connect')
 def add_client():
-    print("Event: connect")
+    print(f"Event for {flask_login.current_user.username} connect")
     # On connecting, we save the session id for each user
     app.config['clients'][flask_login.current_user.username] = request.sid
     print(f'{flask_login.current_user.username}: {request.sid}')
@@ -30,29 +30,63 @@ def add_client():
 
 @socketio.on('disconnect')
 def remove_client():
-    print("Event: disconnect")
+    print(f"Event for {flask_login.current_user.username} disconnect")
     print(f"Username: {flask_login.current_user.username}")
-    #username = flask_login.current_user.username
-    #clients.pop(username)
-    #print(f"len(clients) = {len(clients)}")
+    
     app.config['clients'].pop(flask_login.current_user.username)
+
+@socketio.on('req-list-of-messages')
+def get_existing_messages(receiver):
+    print(f"Event for {flask_login.current_user.username}: req-list-of-messages of {receiver}")
+    sender = flask_login.current_user.username
+
+    messages = db.session.query(Messages).filter(
+        or_(
+            and_(
+                Messages.sender.like(sender),
+                Messages.receiver.like(receiver)
+            ),
+            and_(
+                Messages.sender.like(receiver),
+                Messages.receiver.like(sender)
+            )
+        )
+    )
+    list_of_messages = []
+    
+    for message in messages:
+        if message.sender == sender:
+            class_name = 'sent'
+        else:
+            class_name = 'received'
+    
+        list_of_messages.append({
+            'message': message.message,
+            'class_name': class_name
+            })
+    # print(list_of_messages)
+    socketio.emit('get-list-of-messages', list_of_messages, room=app.config['clients'][sender])
 
 @socketio.on('send-message')
 def handle_message(data):
-    print("Event: send-message")
+    print(f"Event for {flask_login.current_user.username}: send-message")
     receiver = data['receiver']
     message = data['message']
-    # DO SOMETHING
-    # user = flask_login.current_user
-    # print(user.__dict__)
-    # print(session)
-    #print(message)
-    #clients[receiver].emit()
+
+    # Save the message to the database
+    new_message = Messages()
+    new_message.sender = flask_login.current_user.username
+    new_message.receiver = receiver
+    new_message.message = message
+    db.session.add(new_message)
+    db.session.commit()
+    
     data_to_send = {
         'message'   :   message,
         'from'    :   flask_login.current_user.username
     }
     print(f"Data: {data_to_send}")
+
     socketio.emit('display-message', data_to_send, room=app.config['clients'][receiver])
 
 
