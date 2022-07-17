@@ -1,4 +1,9 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from email import message
+from email.policy import default
 import os
+from django.dispatch import receiver
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin
@@ -28,6 +33,13 @@ class User(UserMixin, db.Model):
             "name"  : self.name,
             "email" : self.email
         }
+
+class Messages(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.String(80))
+    receiver = db.Column(db.String(80))
+    message = db.Column(db.String(256))
+    time = db.Column(db.DateTime(timezone=True), default=datetime.now(tz=ZoneInfo('Asia/Kolkata')))
 
 
 def create_app():
@@ -67,5 +79,6 @@ def create_app():
 __all__ = [
     "create_app",
     "db",
-    "User"
+    "User",
+    "Messages"
 ]

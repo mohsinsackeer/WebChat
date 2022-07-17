@@ -25,6 +25,13 @@ var main = function(){
     var msg_text =$('#msg_input');
     var messages = $('#messages');
 
+    var display_message = function(message, class_name){
+        var li = $('<li>');
+        li.append('<div class = div-'+ class_name +'> <p >'+ message +'</p> </div>');
+        li.addClass(class_name);
+        messages.append(li);
+    };
+
     socket.on("set-username", function(data){
         sender = data.sender;
     });
@@ -59,19 +66,36 @@ var main = function(){
                     // $(".div-chat-name img").addClass("profile-pic");
                     $('.messages').empty();
                     receiver = user.username;
+
+                    socket.emit('req-list-of-messages', receiver);
                 });
             
         });
+    });
+
+    socket.on('disconnect', function(){
+        location.reload(True);
+        console.log('Reloaded');
+    });
+
+    socket.on('get-list-of-messages', function(list_of_messages){
+        console.log('get-list-of-messages')
+        list_of_messages.forEach(function(msg){
+            display_message(msg.message, msg.class_name);
+        });
+        $("html, body").animate({ scrollTop: $(document).height() }, 1000);
     });
 
     socket.on('display-message', function(data){
 
         if (data.from !== receiver) { return; }
         console.log(data.message);
-        var li = $('<li>');
-        li.append('<div class = div-received> <p >'+ data.message +'</p> </div>');
-        li.addClass('received');
-        messages.append(li);
+        // var li = $('<li>');
+        // li.append('<div class = div-received> <p >'+ data.message +'</p> </div>');
+        // li.addClass('received');
+        // messages.append(li);
+
+        display_message(data.message, 'received');
     });
 
     // Message SEND Button is clicked 
@@ -94,11 +118,14 @@ var main = function(){
             
             // Show the test as sent
             //msgArray.push(msg_text.val())
-            var li = $('<li>');
+
+
+            // var li = $('<li>');
             var msg = msg_text.val();
-            li.append('<div class = div-sent> <p >'+ msg +'</p> </div>');
-            li.addClass('sent');
-            messages.append(li);
+            // li.append('<div class = div-sent> <p >'+ msg +'</p> </div>');
+            // li.addClass('sent');
+            // messages.append(li);
+            display_message(msg, 'sent')
             
             // Send the message and receiver's username to 
             data = {'receiver' : receiver,
