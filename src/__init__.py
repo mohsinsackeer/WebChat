@@ -1,9 +1,6 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from email import message
-from email.policy import default
 import os
-from django.dispatch import receiver
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin
@@ -59,8 +56,7 @@ def create_app():
         login_manager.init_app(app)
 
         # Create the following statement to retain the value in database
-        #db.drop_all()
-
+        # db.drop_all()
         db.create_all()
 
         @login_manager.user_loader

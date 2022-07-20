@@ -1,3 +1,4 @@
+from requests import session
 import socketio
 from src import create_app, User, Messages, db
 from flask import request
@@ -16,7 +17,7 @@ def add_client():
     # On connecting, we save the session id for each user
     app.config['clients'][flask_login.current_user.username] = request.sid
     print(f'{flask_login.current_user.username}: {request.sid}')
-
+    
     # We return the JSON object with the current user's (sender's) username
     data_to_send = {
         'sender'  :   flask_login.current_user.username
@@ -25,12 +26,30 @@ def add_client():
     socketio.emit('set-username', data_to_send, room=app.config['clients'][flask_login.current_user.username])
 
     # Send the list of users in the database to the website
-    list_of_users = [{'username':user.username, 'name':user.name} for user in User.query.all()]
+    # Prepare the list of users
+    list_of_users = []
+
+    # To list out the name of all users, uncomment the below code:
+    # list_of_users = [{'username':user.username, 'name':user.name} for user in User.query.all()]
+    username = flask_login.current_user.username
+    results = db.session.query(Messages).filter(
+        or_(Messages.sender.like(username),
+            Messages.receiver.like(username))
+    ).all()
+    for result in results[::-1]:
+        if result.sender == username and result.receiver not in list_of_users:
+            user = User.query.filter_by(username=result.receiver).all()
+        elif result.receiver == username and result.sender not in list_of_users:
+            user = User.query.filter_by(username=result.sender).all()
+        valid_user = {'username': user[0].username, 'name': user[0].name}
+        if valid_user not in list_of_users:
+            list_of_users.append(valid_user)
+    print(list_of_users)
     socketio.emit('get-list-of-users', list_of_users, room=app.config['clients'][flask_login.current_user.username])
 
 @socketio.on('disconnect')
 def remove_client():
-    print(f"Event for {flask_login.current_user.username} disconnect")
+    print(f"Event for {flask_login.current_user.username}: disconnect")
     print(f"Username: {flask_login.current_user.username}")
     
     app.config['clients'].pop(flask_login.current_user.username)
@@ -52,8 +71,12 @@ def get_existing_messages(receiver):
             )
         )
     )
-    list_of_messages = []
-    
+    list_of_messages = [{'message': message.message, 'class_name': 'sent'}
+                        if message.sender == sender
+                        else
+                        {'message': message.message, 'class_name': 'received'}
+                        for message in messages]
+    """
     for message in messages:
         if message.sender == sender:
             class_name = 'sent'
@@ -64,7 +87,8 @@ def get_existing_messages(receiver):
             'message': message.message,
             'class_name': class_name
             })
-    # print(list_of_messages)
+    """
+    print(list_of_messages)
     socketio.emit('get-list-of-messages', list_of_messages, room=app.config['clients'][sender])
 
 @socketio.on('send-message')
@@ -89,6 +113,23 @@ def handle_message(data):
 
     socketio.emit('display-message', data_to_send, room=app.config['clients'][receiver])
 
+@socketio.on('doesUsernameExists')
+def does_username_exists(data):
+    user_name = data['username']
+    result = User.query.filter_by(username=f'{user_name}').first()
+    # result = User.query.filter_by(username='Jogn')
+    try:
+        if result.username:
+            data = {'answer': 'True',
+                    'username': result.username,
+                    'name': result.name}
+    except Exception as e:
+        print(e)
+        data = {'answer': 'False'}
+    print(data)
+    socketio.emit('answerToDoesUsernameExists',
+                data,
+                room=app.config['clients'][flask_login.current_user.username])
 
 if __name__ == '__main__':
     # app.run(debug=True)
