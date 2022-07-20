@@ -72,32 +72,6 @@ var main = function(){
         
         list_of_users.forEach(function(user){
             insertContact(user);
-            // all_usernames.push(user.username);
-            // // if (user.username === sender){ return; }
-
-            // var li = $('<li>');
-            // var div = $('<div>');
-            // div.addClass("contacts-listitem");
-            // div.prepend('<div class = demo-image></div>'); //to be changed later
-            // div.append('<span >'+ user.name +'</span>');
-            // li.append(div);
-            // li.addClass(user.username);
-            // list.append(li);
-
-            // $("#chat-list").on('click', 'li.'+user.username, function(){
-            //     console.log(user.username);
-
-            //     $(".div-chat-name span").text(user.name);
-            //     $(".div-chat-name div").addClass("demo-image");
-            //     // $(".div-chat-name img").attr("src", str);
-            //     // $(".div-chat-name img").attr("alt", "friend's profile image");
-            //     // $(".div-chat-name img").addClass("profile-pic");
-            //     $('.messages').empty();
-            //     receiver = user.username;
-
-            //     socket.emit('req-list-of-messages', receiver);
-            // });
-            
         });
     });
 

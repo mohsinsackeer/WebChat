@@ -56,33 +56,8 @@ def create_app():
         login_manager.init_app(app)
 
         # Create the following statement to retain the value in database
-        db.drop_all()
-
+        # db.drop_all()
         db.create_all()
-
-        u = User()
-        u.name = 'admin1'
-        u.username = 'admin1'
-        u.email = 'admin1'
-        u.set_password('admin1')
-        db.session.add(u)
-        db.session.commit()
-
-        u = User()
-        u.name = 'admin2'
-        u.username = 'admin2'
-        u.email = 'admin2'
-        u.set_password('admin2')
-        db.session.add(u)
-        db.session.commit()
-
-        u = User()
-        u.name = 'admin3'
-        u.username = 'admin3'
-        u.email = 'admin3'
-        u.set_password('admin3')
-        db.session.add(u)
-        db.session.commit()
 
         @login_manager.user_loader
         def load_user(user_id):
