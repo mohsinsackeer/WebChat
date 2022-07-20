@@ -36,6 +36,33 @@ var main = function(){
         sender = data.sender;
     });
 
+    var insertContact = function(user){
+        if (all_usernames.includes(user.username)){return;}
+        all_usernames.push(user.username);
+        var li = $('<li>');
+        var div = $('<div>');
+        div.addClass("contacts-listitem");
+        div.prepend('<div class = demo-image></div>'); //to be changed later
+        div.append('<span >'+ user.name +'</span>');
+        li.append(div);
+        li.addClass(user.username);
+        list.append(li);
+
+        $("#chat-list").on('click', 'li.'+user.username, function(){
+            console.log(user.username);
+
+            $(".div-chat-name span").text(user.name);
+            $(".div-chat-name div").addClass("demo-image");
+            // $(".div-chat-name img").attr("src", str);
+            // $(".div-chat-name img").attr("alt", "friend's profile image");
+            // $(".div-chat-name img").addClass("profile-pic");
+            $('.messages').empty();
+            receiver = user.username;
+
+            socket.emit('req-list-of-messages', receiver);
+        });
+    };
+
     // Display the name of all users in the contacts section
     socket.on("get-list-of-users", function(list_of_users){
 
@@ -44,36 +71,47 @@ var main = function(){
         var str = "";
         
         list_of_users.forEach(function(user){
-            all_usernames.push(user.username);
-            if (user.username === sender){ return; }
+            insertContact(user);
+            // all_usernames.push(user.username);
+            // // if (user.username === sender){ return; }
 
-                var li = $('<li>');
-                var div = $('<div>');
-                div.addClass("contacts-listitem");
-                div.prepend('<div class = demo-image></div>'); //to be changed later
-                div.append('<span >'+ user.name +'</span>');
-                li.append(div);
-                li.addClass(user.username);
-                list.append(li);
+            // var li = $('<li>');
+            // var div = $('<div>');
+            // div.addClass("contacts-listitem");
+            // div.prepend('<div class = demo-image></div>'); //to be changed later
+            // div.append('<span >'+ user.name +'</span>');
+            // li.append(div);
+            // li.addClass(user.username);
+            // list.append(li);
 
-                $("#chat-list").on('click', 'li.'+user.username, function(){
-                    console.log(user.username);
+            // $("#chat-list").on('click', 'li.'+user.username, function(){
+            //     console.log(user.username);
 
-                    $(".div-chat-name span").text(user.name);
-                    $(".div-chat-name div").addClass("demo-image");
-                    // $(".div-chat-name img").attr("src", str);
-                    // $(".div-chat-name img").attr("alt", "friend's profile image");
-                    // $(".div-chat-name img").addClass("profile-pic");
-                    $('.messages').empty();
-                    receiver = user.username;
+            //     $(".div-chat-name span").text(user.name);
+            //     $(".div-chat-name div").addClass("demo-image");
+            //     // $(".div-chat-name img").attr("src", str);
+            //     // $(".div-chat-name img").attr("alt", "friend's profile image");
+            //     // $(".div-chat-name img").addClass("profile-pic");
+            //     $('.messages').empty();
+            //     receiver = user.username;
 
-                    socket.emit('req-list-of-messages', receiver);
-                });
+            //     socket.emit('req-list-of-messages', receiver);
+            // });
             
         });
     });
 
+    $(window).on('beforeunload', function(event){
+        event.preventDefault();
+        return event.returnValue = 'Are you sure you want to exit?'
+    });
+
+    socket.on('connect', function(){
+        $(".contacts-p").text("Contacts Section");
+    });
+
     socket.on('disconnect', function(){
+        $(".contacts-p").text("DISCONNECTED...");
         location.reload(True);
         console.log('Reloaded');
     });
@@ -104,32 +142,11 @@ var main = function(){
 
         if(msg_text.val()!=''){
 
-            /*
-            // Receiver's code
-            msgArray.push(msg_text.val())
-            var li = $('<li>').text(msg_text.val());
-            var span = $('<span>').text('mohsinsackeer: ');
-            span.addClass('sender-username');
-            li.prepend(span);
-            li.addClass('received');
-            messages.append(li);
-            */
-
-            
-            // Show the test as sent
-            //msgArray.push(msg_text.val())
-
-
-            // var li = $('<li>');
             var msg = msg_text.val();
-            // li.append('<div class = div-sent> <p >'+ msg +'</p> </div>');
-            // li.addClass('sent');
-            // messages.append(li);
             display_message(msg, 'sent')
             
             // Send the message and receiver's username to 
-            data = {'receiver' : receiver,
-                    'message'  : msg}
+            data = {'receiver': receiver, 'message': msg}
             socket.emit('send-message', data);
 
             // Empty the input bar
@@ -140,10 +157,22 @@ var main = function(){
         }
     });
 
+    socket.on('answerToDoesUsernameExists', function(data){
+        if (data['answer'] === 'True'){
+            // do something
+            console.log(data);
+            user = {'username': data.username,
+                    'name': data.name};
+            insertContact(user);
+        }
+    });
+
     $('#search-username').on("keypress", function(event){
-        if (event.keyCode === 13){
-            var username = $('#search-username').val();
-            $('#chat-list li.'+ username).trigger('click');
+        if ((event.keyCode === 13) && ($('#search-username').val() !== sender)){
+            // console.log($('#search-username').val());
+            socket.emit('doesUsernameExists', {'username': $('#search-username').val()})
+            // var username = $('#search-username').val();
+            // $('#chat-list li.'+ username).trigger('click');
         }
     });
 };
