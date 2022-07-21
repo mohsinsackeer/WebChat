@@ -34,6 +34,10 @@ var main = function(){
 
     socket.on("set-username", function(data){
         sender = data.sender;
+
+        // $(".btn.btn-danger").text(sender);
+        $("#contacts-section > div.contacts-header > div > button:nth-child(1)").text(sender);
+        $(".btn-group").show();
     });
 
     var insertContact = function(contact){
@@ -94,7 +98,8 @@ var main = function(){
     });
 
     socket.on('disconnect', function(){
-        $(".contacts-p").text("DISCONNECTED...");
+        $(".btn-group").hide();
+        $(".contacts-p").show();
         location.reload(True);
         console.log('Reloaded');
     });
