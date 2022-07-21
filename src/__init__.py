@@ -1,4 +1,6 @@
 from datetime import datetime
+from enum import unique
+from time import time
 from zoneinfo import ZoneInfo
 import os
 from flask import Flask
@@ -38,6 +40,18 @@ class Messages(db.Model):
     message = db.Column(db.String(256))
     time = db.Column(db.DateTime(timezone=True), default=datetime.now(tz=ZoneInfo('Asia/Kolkata')))
 
+class Groups(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), index=True, unique=True)
+    members = db.Column(db.String(1215))
+    admins = db.Column(db.String(1215))
+
+class GroupMessages(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    group_name = db.Column(db.String(80))
+    sender = db.Column(db.String(80))
+    message = db.Column(db.String(256))
+    time = db.Column(db.DateTime(timezone=True), default=datetime.now(tz=ZoneInfo('Asia/Kolkata')))
 
 def create_app():
     curr_dir = os.getcwd()
@@ -56,8 +70,16 @@ def create_app():
         login_manager.init_app(app)
 
         # Create the following statement to retain the value in database
-        # db.drop_all()
+        #db.drop_all()
         db.create_all()
+
+        # Creating a sample group (since creating from frontend is not yet possible)
+        # grp = Groups()
+        # grp.name = 'Changadam Boys'
+        # grp.members = 'mohsinsackeer,admin1,admin2'
+        # grp.admins = 'mohsinsackeer'
+        # db.session.add(grp)
+        # db.session.commit()
 
         @login_manager.user_loader
         def load_user(user_id):
@@ -76,5 +98,7 @@ __all__ = [
     "create_app",
     "db",
     "User",
-    "Messages"
+    "Messages",
+    "Groups",
+    "GroupMessages"
 ]

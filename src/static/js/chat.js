@@ -3,7 +3,7 @@ var main = function(){
     console.log('chat.js is active!');
 
     var socket = io();
-    var receiver = "";
+    var receiver;
     var sender;
     var all_usernames = [];
 
@@ -36,35 +36,44 @@ var main = function(){
         sender = data.sender;
     });
 
-    var insertContact = function(user){
-        if (all_usernames.includes(user.username)){return;}
-        all_usernames.push(user.username);
+    var insertContact = function(contact){
+        if (contact.type === 'user'){
+            if (all_usernames.includes(contact.username))
+            {
+                return;
+            }
+            else{
+                all_usernames.push(contact.username);
+            }
+        }
         var li = $('<li>');
         var div = $('<div>');
         div.addClass("contacts-listitem");
         div.prepend('<div class = demo-image></div>'); //to be changed later
-        div.append('<span >'+ user.name +'</span>');
+        div.append('<span >'+ contact.name +'</span>');
         li.append(div);
-        li.addClass(user.username);
+        li.addClass(contact.username);
         list.append(li);
+        var class_selector = '.' + contact.username.split(' ').join('.');
+        $("#chat-list").on('click', 'li'+ class_selector, function(){
+            console.log(2);
+            console.log(contact.username);
 
-        $("#chat-list").on('click', 'li.'+user.username, function(){
-            console.log(user.username);
-
-            $(".div-chat-name span").text(user.name);
+            $(".div-chat-name span").text(contact.name);
             $(".div-chat-name div").addClass("demo-image");
             // $(".div-chat-name img").attr("src", str);
             // $(".div-chat-name img").attr("alt", "friend's profile image");
             // $(".div-chat-name img").addClass("profile-pic");
             $('.messages').empty();
-            receiver = user.username;
+            receiver = {'type': contact.type,
+                        'name_or_username': contact.username};
 
             socket.emit('req-list-of-messages', receiver);
         });
     };
 
     // Display the name of all users in the contacts section
-    socket.on("get-list-of-users", function(list_of_users){
+    socket.on("get-list-of-contacts", function(list_of_users){
 
         var list = $('#chat-list');
         list.empty();
@@ -100,7 +109,7 @@ var main = function(){
 
     socket.on('display-message', function(data){
 
-        if (data.from !== receiver) { return; }
+        if (data.from !== receiver.name_or_username) { return; }
         console.log(data.message);
         // var li = $('<li>');
         // li.append('<div class = div-received> <p >'+ data.message +'</p> </div>');
@@ -120,7 +129,11 @@ var main = function(){
             display_message(msg, 'sent')
             
             // Send the message and receiver's username to 
-            data = {'receiver': receiver, 'message': msg}
+            data = {
+                'type': receiver.type,
+                'receiver': receiver.name_or_username, 
+                'message': msg}
+            console.log(data);
             socket.emit('send-message', data);
 
             // Empty the input bar
@@ -135,7 +148,8 @@ var main = function(){
         if (data['answer'] === 'True'){
             // do something
             console.log(data);
-            user = {'username': data.username,
+            user = {'type': 'user',
+                    'username': data.username,
                     'name': data.name};
             insertContact(user);
         }
