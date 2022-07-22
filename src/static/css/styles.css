@@ -25,7 +25,8 @@ body{
 }
 
 .contacts-header, .chat-header{
-    height: 35px;
+    /* height: 35px; */
+    height: fit-content;
     background-color: wheat;
     padding: 10px;
     text-align: center;
