@@ -65,7 +65,7 @@
 
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" id="createGroupButton">Create Group</button>
+                  <button type="button" class="btn btn-primary" id="createGroupButton" data-target="#errorWarningModal" data-toggle="modal">Create Group</button>
                 </div>
 
               </div>
@@ -73,18 +73,18 @@
           </div>
 
 
-          <!-- Modal for showing Errors / Warnings -->
-          <div class="modal" tabindex="-1" id="errorWarningModal" data-keyboard="false" data-backdrop="static">
+        <!-- Modal for showing Errors / Warnings -->
+        <div class="modal" tabindex="-1" id="errorWarningModal"  data-keyboard="false" data-backdrop="static">
             <div class="modal-dialog">
               <div class="modal-content">
 
                 <div class="modal-header">
-                  <h5 class="modal-title" id="modalTitle"></h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 class="modal-title" id="modalTitle">Title Error</h5>
+                  <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
                 </div>
 
                 <div class="modal-body">
-                    <p class="text-warning" id="modalText"></p>
+                    <p class="text-warning" id="modalText">Message Message Message Error</p>
                 </div>
 
                 <div class="modal-footer">
@@ -95,6 +95,7 @@
               </div>
             </div>
           </div>
+
     </body>
 
 </html>

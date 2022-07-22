@@ -24,13 +24,18 @@ def add_client():
     print(f"{flask_login.current_user.username}: {data_to_send}")
     socketio.emit('set-username', data_to_send, room=app.config['clients'][flask_login.current_user.username])
 
+@socketio.on('req-list-of-contacts')
+def send_contacts(data):
+    username = flask_login.current_user.username
+    
+    print("Event for {username}: req-list-of-contacts")
+
     # Send the list of users in the database to the website
     # Prepare the list of users
     list_of_users = []
 
     # To list out the name of all users, uncomment the below code:
     # list_of_users = [{'username':user.username, 'name':user.name} for user in User.query.all()]
-    username = flask_login.current_user.username
     results = db.session.query(Messages).filter(
         or_(Messages.sender.like(username),
             Messages.receiver.like(username))
@@ -57,7 +62,7 @@ def add_client():
     # And add only the groups in which the user's username is present in Groups.members
     all_groups = Groups.query.all()
     # List of all members in the group
-    for group in all_groups:
+    for group in all_groups[::-1]:
         members = group.members.strip(',').split(',')
         if username in members:
             list_of_groups.append({
@@ -69,12 +74,13 @@ def add_client():
     socketio.emit('get-list-of-contacts',
                 list_of_users + list_of_groups,
                 room=app.config['clients'][flask_login.current_user.username])
+    
 
 @socketio.on('disconnect')
 def remove_client():
     print(f"Event for {flask_login.current_user.username}: disconnect")
     print(f"Username: {flask_login.current_user.username}")
-    
+    print(app.config['clients'])
     app.config['clients'].pop(flask_login.current_user.username)
 
 @socketio.on('req-list-of-messages')
@@ -180,6 +186,97 @@ def does_username_exists(data):
     socketio.emit('answerToDoesUsernameExists',
                 data,
                 room=app.config['clients'][flask_login.current_user.username])
+
+@socketio.on('create-new-group')
+def create_new_group(data):
+    name = data['name']
+    members = data['members']
+    admins = data['admins']
+    username = flask_login.current_user.username
+
+    members = [member.strip() for member in members.split(',') if isUserExists(member.strip())]
+    admins = [admin.strip() for admin in admins.split(',') if isUserExists(admin.strip())]
+    # if sender not in members:
+    #     members.append(sender)
+
+    """
+    Error Cases:
+    1. Person who created the group is not in it
+    2. Person who created the group is not an admin
+    3. If no member in group other than person who created
+    4. Usernames in admins not in members
+    5. Group size > 15
+    """
+    flag = True
+    # Case 1
+    if username not in members:
+        members.append(username)
+    # Case 2
+    if username not in admins:
+        admins.append(username)
+    # Case 3
+    if len(members) == 1:
+        warning_or_error = 'Error: Group Creation Failed'
+        message = f'You must add at least one more member in the group!'
+        show_warning_error(username, warning_or_error, message)
+        flag = False
+        print("Case 3 Failed")
+        return
+    print("Case 3 Success")
+    # Case 4
+    users = []
+    for admin in admins:
+        if admin not in members:
+            users.append(admin)
+    users = ', '.join(users)
+    if len(users) > 0:
+        warning_or_error = 'Error: Group Creation Failed'
+        message = f'Given admins: {users} is not mentioned as members!'
+        show_warning_error(username, warning_or_error, message)
+        flag = False
+        print("Case 4 Failed")
+        return
+    print("Case 4 Success")
+    # Case 5
+    if len(members) > 15:
+        warning_or_error = 'Error: Group Creation Failed'
+        message = f'Groups can have max 15 members!'
+        show_warning_error(username, warning_or_error, message)
+        flag = False
+        print("Case 5 Failed")
+        return
+    print("Case 5 Success")
+
+    if flag:
+        members = ",".join(members)
+        admins = ",".join(admins)
+
+        group = Groups()
+        group.name = name
+        group.members = members
+        group.admins = admins
+        db.session.add(group)
+        db.session.commit()
+
+
+    socketio.emit('group-created',
+                'Success',
+                room=app.config['clients'][username])
+
+def isUserExists(username):
+    results = User.query.filter_by(username=username).first()
+    if results:
+        return True
+    return False
+
+def show_warning_error(username, title, message):
+    data_to_send = {
+        'warning_or_error': title,
+        'message': message
+    }
+    socketio.emit('warning-or-error',
+                data_to_send,
+                room=app.config['clients'][username])
 
 if __name__ == '__main__':
     # app.run(debug=True)

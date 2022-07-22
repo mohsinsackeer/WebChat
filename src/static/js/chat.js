@@ -7,6 +7,8 @@ var main = function(){
     var sender;
     var all_usernames = [];
 
+    var error_title, error_message;
+
 
     var names= ["Adwaith", "Mohsin","DK"];
     var list = $('#chat-list');
@@ -89,12 +91,14 @@ var main = function(){
     });
 
     $(window).on('beforeunload', function(event){
-        event.preventDefault();
-        return event.returnValue = 'Are you sure you want to exit?'
+        //event.preventDefault();
+        //return event.returnValue = 'Are you sure you want to exit?'
     });
 
     socket.on('connect', function(){
+        console.log('connect');
         $(".contacts-p").text("Contacts Section");
+        socket.emit('req-list-of-contacts', 'request');
     });
 
     socket.on('disconnect', function(){
@@ -158,6 +162,23 @@ var main = function(){
                     'name': data.name};
             insertContact(user);
         }
+    });
+
+    socket.on('group-created', function(data){
+        socket.emit('req-list-of-contacts', 'Request');
+    });
+
+    socket.on('warning-or-error', function(data){
+        error_title = data.warning_or_error
+        error_message = data.message
+        // $("#errorWarningModal #modalTitle").text(title);
+        // $("#errorWarningModal #modalText").text(message);
+        // $("#errorWarningModal").modal('toggle');
+        // console.log($("#errorWarningModal #modalTitle").text());
+        // console.log($("#errorWarningModal #modalText").text());
+        alert(error_title + '\n' + error_message);
+        error_title = '';
+        error_message = '';
     });
 
     $('#search-username').on("keypress", function(event){
