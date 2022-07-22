@@ -100,7 +100,7 @@ var main = function(){
     socket.on('disconnect', function(){
         $(".btn-group").hide();
         $(".contacts-p").show();
-        location.reload(True);
+        location.reload(true);
         console.log('Reloaded');
     });
 
@@ -167,6 +167,44 @@ var main = function(){
             // var username = $('#search-username').val();
             // $('#chat-list li.'+ username).trigger('click');
         }
+    });
+
+    // To open the modal box
+    $("#anchorTagCreateGroup").on('click', function(){
+        // $("#createGroupModal").show();
+        console.log($("#createGroupModal #fillAllEntryMessage").text(''));
+        $("#createGroupModal").modal('toggle');
+    });
+
+    $("#createGroupButton").on('click', function(){
+        var nameInput = $("#groupNameInput"),
+            membersInput = $("#groupMembersInput"),
+            adminsInput = $("#groupAdminsInput");
+        
+        var group_name = nameInput.val(),
+            group_members = membersInput.val(),
+            group_admins = adminsInput.val();
+
+        if ((group_name!=='') && (group_members!=='') && (group_admins!=='')){
+            // console.log(group_name);
+            // console.log(group_members);
+            // console.log(group_admins);
+            nameInput.val('');
+            membersInput.val('');
+            adminsInput.val('');
+            data_to_send = {
+                'name': group_name,
+                'members': group_members,
+                'admins': group_admins
+            }
+            console.log(data_to_send);
+            socket.emit('create-new-group', data_to_send);
+            $("#createGroupModal").modal('toggle');
+        }
+        else{
+            console.log($("#createGroupModal #fillAllEntryMessage").text('You must fill all entries!'));
+        }
+
     });
 };
 
