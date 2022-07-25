@@ -1,5 +1,5 @@
 import socketio
-from src import create_app, User, Messages, Groups, GroupMessages, db
+from src import create_app, User, Messages, Groups, GroupMessages, db, cloudinary_creds
 from flask import request, session
 from flask_socketio import SocketIO
 import flask_login
@@ -19,7 +19,8 @@ def add_client():
     
     # We return the JSON object with the current user's (sender's) username
     data_to_send = {
-        'sender'  :   flask_login.current_user.username
+        'sender':   flask_login.current_user.username,
+        'dp_url': flask_login.current_user.dp_url
     }
     print(f"{flask_login.current_user.username}: {data_to_send}")
     socketio.emit('set-username', data_to_send, room=app.config['clients'][flask_login.current_user.username])
@@ -27,7 +28,7 @@ def add_client():
 @socketio.on('req-list-of-contacts')
 def send_contacts(data):
     username = flask_login.current_user.username
-    
+
     print("Event for {username}: req-list-of-contacts")
 
     # Send the list of users in the database to the website
@@ -52,7 +53,8 @@ def send_contacts(data):
             valid_user = {
                 'type': 'user',
                 'username': user[0].username,
-                'name': user[0].name}
+                'name': user[0].name,
+                'dp_url': user[0].dp_url}
             if valid_user not in list_of_users:
                 list_of_users.append(valid_user)
 
@@ -68,7 +70,8 @@ def send_contacts(data):
             list_of_groups.append({
                 'type': 'group',
                 'username': group.name,
-                'name': group.name
+                'name': group.name,
+                'dp_url': group.dp_url
                 })
     print(f'list-of-contacts for {username}: {list_of_users + list_of_groups}')
     socketio.emit('get-list-of-contacts',
@@ -178,7 +181,8 @@ def does_username_exists(data):
         if result.username:
             data = {'answer': 'True',
                     'username': result.username,
-                    'name': result.name}
+                    'name': result.name,
+                    'dp_url': result.dp_url}
     except Exception as e:
         print(e)
         data = {'answer': 'False'}
@@ -255,6 +259,7 @@ def create_new_group(data):
         group.name = name
         group.members = members
         group.admins = admins
+        group.dp_url = 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png'
         db.session.add(group)
         db.session.commit()
 
