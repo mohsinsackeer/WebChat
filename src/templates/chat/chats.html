@@ -1,16 +1,19 @@
-{% extends 'chat/base_chat.html' %}
+{% extends 'chat/base_chat.html' %}ger
 
 <!--Code for Contacts Section-->
 {% block contacts %}
 <div class="contacts-header">
     <p class="contacts-p" hidden>DISCONNECTED...</p>
+    <div class = image-holder></div>
+    
+    <span>Contacts Section</Section></span>
 
-    <!-- Example split danger button -->
-    <div class="btn-group">
-        <button type="button" class="btn btn-danger">Contacts Section</Section></button>
-        <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="visually-hidden">Toggle Dropdown</span>
-        </button>
+    <div class="btn-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+        <!-- <span class="visually-hidden">Toggle Dropdown</span> -->
+        <div class ="dropdown-btn">
+            <img src = "https://cdn1.iconfinder.com/data/icons/jumpicon-basic-ui-glyph-1/32/-_Dot-More-Vertical-Menu-512.png">
+        </div>
+    </div>
         <ul class="dropdown-menu">
         <li><a class="dropdown-item" href="#createGroupModal" data-target="#createGroupModal" data-toggle="modal" id="anchorTagCreateGroup">Create Group</a></li>
         <!-- <li><a class="dropdown-item" href="#">Another action</a></li> -->
@@ -18,7 +21,7 @@
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href={{ url_for('auth.logout') }}>Log out</a></li>
         </ul>
-    </div>
+   
 </div>
 
 

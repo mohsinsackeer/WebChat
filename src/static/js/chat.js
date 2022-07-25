@@ -36,11 +36,15 @@ var main = function(){
 
     socket.on("set-username", function(data){
         sender = data.sender;
+        console.log(sender);
 
         // $(".btn.btn-danger").text(sender);
-        $("#contacts-section > div.contacts-header > div > button:nth-child(1)").text(sender);
+        $("#contacts-section > div.contacts-header > span").text(sender);
+        $("#contacts-section > div.contacts-header > div.image-holder").append('<div class = demo-image><img src = "'+str+'"  alt="contact_image"></div>')
         $(".btn-group").show();
     });
+
+    
 
     var insertContact = function(contact){
         if (contact.type === 'user'){
@@ -55,7 +59,7 @@ var main = function(){
         var li = $('<li>');
         var div = $('<div>');
         div.addClass("contacts-listitem");
-        div.prepend('<div class = demo-image></div>'); //to be changed later
+        div.prepend('<div class = demo-image><img src = "'+str+'"  alt="contact_image"></div>'); //to be changed later
         div.append('<span >'+ contact.name +'</span>');
         li.append(div);
         li.addClass(contact.username);
@@ -67,6 +71,7 @@ var main = function(){
 
             $(".div-chat-name span").text(contact.name);
             $(".div-chat-name div").addClass("demo-image");
+            $(".div-chat-name div").append('<img src = "'+str+'"  alt="contact_image">');
             // $(".div-chat-name img").attr("src", str);
             // $(".div-chat-name img").attr("alt", "friend's profile image");
             // $(".div-chat-name img").addClass("profile-pic");
