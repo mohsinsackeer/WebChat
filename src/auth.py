@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, session, request
 from flask_login import login_user, logout_user, login_required
-from src import User, db
+from src import User, db, cloudinary_creds
+import cloudinary
+from cloudinary import uploader
+from cloudinary.utils import cloudinary_url
 
 auth = Blueprint('auth', __name__)
 
@@ -51,6 +54,7 @@ def signup_submit():
     username = request.form['username']
     email = request.form['email']
     password = request.form['password']
+    image = request.files['image']
 
     if not (name or username or email or password):
         error_msg = 'Please enter all details, and Try Again!'
@@ -67,12 +71,21 @@ def signup_submit():
         return render_template('auth/signup_page.html',
                                 error_msg=error_msg)
     
+    if image:
+        upload_result = uploader.upload(image)
+        dp_url, options = cloudinary_url(
+            upload_result['public_id'],
+            crop="fill",
+        )
+    else:
+        dp_url = 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png'
+    print(dp_url)
     u = User()
     u.name = name
     u.username = username
     u.email = email
     u.set_password(password)
-    # session['username'] = username
+    u.dp_url = dp_url
     session.pop('username', None)
     db.session.add(u)
     db.session.commit()

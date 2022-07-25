@@ -4,7 +4,7 @@
 
 <h1>Sign Up Here</h1>
 
-<form action="/signup_submit", method="post">
+<form action="/signup_submit", method="post" enctype="multipart/form-data">
 
     <table>
 
@@ -29,8 +29,13 @@
         </tr>
 
         <tr>
-            <td>Password :</td>
+            <td><p>Password :</p>></td>
             <td><input type="password" name="password"></td>
+        </tr>
+
+        <tr>
+            <td><p>Profile Image: </p></td>
+            <td><input type="file" name="image" id="dp_image"></td>
         </tr>
     </table>
 

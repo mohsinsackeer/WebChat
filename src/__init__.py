@@ -5,6 +5,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from . import cloudinary_creds
 
 db = SQLAlchemy()
 
@@ -15,7 +16,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), index=True, unique=True)
     email = db.Column(db.String(80), index=True, unique=True)
     password_hash = db.Column(db.String(80), index=True)
-    # image = db.Column(db.String(256))
+    dp_url = db.Column(db.String(256))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -42,6 +43,7 @@ class Groups(db.Model):
     name = db.Column(db.String(80), index=True, unique=True)
     members = db.Column(db.String(1215))
     admins = db.Column(db.String(1215))
+    dp_url = db.Column(db.String(256))
 
 class GroupMessages(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -98,4 +100,5 @@ __all__ = [
     "Messages",
     "Groups",
     "GroupMessages",
+    "cloudinary_creds"
 ]
