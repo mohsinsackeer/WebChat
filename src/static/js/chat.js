@@ -44,7 +44,15 @@ var main = function(){
         $(".btn-group").show();
     });
 
-    
+    // hide serarch tab
+
+    $("#search-button").on('click', function(){
+            if($("#div-search-username").css("display") != "none"){
+                $("#div-search-username").css("display","none");
+            }else{
+                $("#div-search-username").css("display","block");
+            }
+    })
 
     var insertContact = function(contact){
         if (contact.type === 'user'){

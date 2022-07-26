@@ -31,12 +31,15 @@ body{
     padding: 10px;
     display: flex;
     text-align: center;
+    font-size: 20px;
+    align-items: center;
     color: purple;
 }
 
 .div-search-username{
     background-color: lightgreen;
     padding: 10px;
+    display: none;
 }
 
 .scroll-div-existing-contacts{
@@ -243,15 +246,15 @@ span.sender-username{
 /* to be removed later */
 
 .demo-image{
-    width: 25px;
-    height: 25px;
+    width: 45px;
+    height: 45px;
     background-color:yellow;
     border-radius: 100%;
     overflow: hidden;
 }
 .demo-image img{
-    width: 25px;
-    height: 25px;
+    width: 45px;
+    height: 45px;
     vertical-align: unset;
 }
 
@@ -262,10 +265,26 @@ span.sender-username{
 .dropdown-btn img{
     width: 15px;
     height: 15px;
+    vertical-align: text-top;
 }
 
 .image-holder{
-    width: 25px;
-    height: 25px;
+    width: 45px;
+    height: 45px;
     margin-right: 5px;
+}
+
+.search-button{
+    width: 20px;
+    height: 20px;
+
+}
+.search-button img{
+    width: 20px;
+    height: 20px;
+    vertical-align: text-top;
+}
+
+.box{
+    width: 100%;
 }
