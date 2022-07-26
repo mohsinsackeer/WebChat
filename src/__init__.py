@@ -69,7 +69,7 @@ def create_app():
         login_manager.init_app(app)
 
         # Create the following statement to retain the value in database
-        #db.drop_all()
+        # db.drop_all()
         db.create_all()
 
         # Creating a sample group (since creating from frontend is not yet possible)
