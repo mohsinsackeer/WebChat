@@ -15,7 +15,7 @@ body{
 
 .contacts-section{
     width: 300px;
-    height: 100%;
+    border-right: 1px solid #7c7c7c;
 }
 
 .chat-section{
@@ -27,17 +27,21 @@ body{
 .contacts-header, .chat-header{
     /* height: 35px; */
     height: fit-content;
-    background-color: wheat;
+    background-color: #005095;
     padding: 10px;
     display: flex;
     text-align: center;
     font-size: 20px;
     align-items: center;
-    color: purple;
+    border-right: 1px solid #fff;
+    color: #fff;
+}
+.contacts-header span{
+    padding-left: 15px;
 }
 
 .div-search-username{
-    background-color: lightgreen;
+    background-color: #c3dfe0;
     padding: 10px;
     display: none;
 }
@@ -61,18 +65,16 @@ body{
 
 
 .div-chat-name{
-    height: 60px;
-    padding: 5px;
+    height: 65px;
+    padding: 5px 5px 5px 5px;
     align-items: center;
     display: flex;
-    background-color: green;
+    background-color: #005095;
     color: #fff;
 }
 
-.div-chat-name img{
-    width: 25px;
-    height: 25px;
-    vertical-align: unset;
+.div-chat-name .demo-image{
+    margin-left: 20px;
 }
 
 .div-chat-name img.profile-pic{
@@ -104,14 +106,15 @@ form{
     background: rgba(0, 0, 0, 0.15);
     padding: 5px;
     flex-grow: 1;
-    border-radius: 2em;
-    margin: 0.25em;
+    display: flex;
+    align-items: center;
 }
 
 form input{
-    height: 20px;
+    height: 40px;
     width: 400px;
-    border: none; padding: 2px; flex-grow: 1; border-radius: 2rem; margin: 0.25rem;
+    border-radius: 10px;
+    border: none; padding: 2px; flex-grow: 1;  margin: 0.25rem;
 }
 
 form input:focus{ outline: none; }
@@ -169,7 +172,7 @@ form button {
     min-height: 20px;
     height: fit-content;
     display: flow-root;
-    margin-top: 10px;
+    margin-top: 5px;
     text-overflow: ellipsis;
     vertical-align: auto;
 }
@@ -183,9 +186,10 @@ form button {
     
 }
 .div-sent{
-    background-color: rgb(96, 178, 96);
+    background-color: #005095;
     float: right;
-    color: #000;
+    color: #fff;
+    border-radius: 15px;
     padding-right: 10px;
     padding-left: 5px;
     padding-top: 5px;
@@ -194,20 +198,25 @@ form button {
 }
 
 .div-sent p{
-    margin: 0px;
+    margin: 0;
+    margin-left: 10px;
+    margin-right: 10px;
     word-break: break-all;
-    max-width: 250px;
+    max-width: 350px;
 }
 .div-received p{
     margin: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
     word-break: break-all;
-    max-width: 250px;
+    max-width: 350px;
 }
 
 
 .div-received{
-    background-color: aliceblue;
+    background-color: whitesmoke;
     float: left;
+    border-radius: 15px;
     color: #000;
     padding-left: 10px;
     padding-right: 5px;
@@ -226,9 +235,10 @@ span.sender-username{
     width:75%;
 }
 .send_bt{
-    background-color: green;
+    background-color: #005095;
     color: #fff;
     margin: 0 20px 0 20px;
+    height: 40px;
     font-size: 20px;
 }
 
@@ -248,7 +258,7 @@ span.sender-username{
 .demo-image{
     width: 45px;
     height: 45px;
-    background-color:yellow;
+    background-color:whitesmoke;
     border-radius: 100%;
     overflow: hidden;
 }
@@ -286,5 +296,52 @@ span.sender-username{
 }
 
 .box{
+    width: 100%;
+}
+
+.auth-form{
+    display: block;
+    background-color: transparent;
+    
+}
+.auth-input{
+    border: 1px solid black;
+    height: 50px;
+}
+.auth-form div{
+    align-items: center;
+    display: inline-flex;
+
+}
+.auth-form div label{
+    font-size: 12px;
+}
+.checkbox{
+    width: 12px;
+    height: 12px;
+    flex-grow: 0;
+}
+.div-auth{
+    height:100%;
+    border: 2px solid black;
+    width: fit-content;
+    margin-left: 5%;
+    text-align: -webkit-center;
+    margin-top: 5%;
+}
+
+.auth-button{
+    width: 400px;
+    height: 40px;
+    color: white;
+    background-color: #005095;
+}
+tr{
+    display: flow-root;
+}
+table{
+    align-items: center;
+}
+.img-upload{
     width: 100%;
 }
