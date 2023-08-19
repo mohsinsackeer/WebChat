@@ -36,7 +36,20 @@ class Messages(db.Model):
     sender = db.Column(db.String(80))
     receiver = db.Column(db.String(80))
     message = db.Column(db.String(256))
+    # is_img = db.Column(db.Integer)
     time = db.Column(db.DateTime(timezone=True), default=datetime.now(tz=ZoneInfo('Asia/Kolkata')))
+
+
+
+class MessagesNew(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.String(80))
+    receiver = db.Column(db.String(80))
+    message = db.Column(db.String(256))
+    is_img = db.Column(db.Integer)
+    time = db.Column(db.DateTime(timezone=True), default=datetime.now(tz=ZoneInfo('Asia/Kolkata')))
+
+    
 
 class Groups(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,6 +57,7 @@ class Groups(db.Model):
     members = db.Column(db.String(1215))
     admins = db.Column(db.String(1215))
     dp_url = db.Column(db.String(256))
+
 
 class GroupMessages(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,7 +71,7 @@ def create_app():
     database_path = os.path.join(curr_dir, 'database/db.sqlite')
     print(f'Database Path: {database_path}')
     app = Flask(__name__)
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.config['SECRET_KEY'] = 'NoOneWillWillEverFigureOut.Ever!'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + database_path
     login_manager = LoginManager()
@@ -70,7 +84,11 @@ def create_app():
 
         # Create the following statement to retain the value in database
         # db.drop_all()
+        # MessagesNew.__table__.drop(db.engine)
         db.create_all()
+
+
+    
 
         # Creating a sample group (since creating from frontend is not yet possible)
         # grp = Groups()

@@ -1,3 +1,5 @@
 src/__pycache__/
-database/db.sqlite
-src/cloudinary_creds.py
+# database/db.sqlite
+src/cloudinary_creds.py.\ennv
+env 
+node_modules

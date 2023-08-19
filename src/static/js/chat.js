@@ -26,12 +26,27 @@ var main = function(){
     var send_btn = document.getElementById('send_bt');
     var msg_text =$('#msg_input');
     var messages = $('#messages');
+    var test_bt = document.getElementById('test-bt');
 
-    var display_message = function(message, class_name){
-        var li = $('<li>');
-        li.append('<div class = div-'+ class_name +'> <p >'+ message +'</p> </div>');
-        li.addClass(class_name);
-        messages.append(li);
+    var display_message = function(message, class_name, is_image){
+        if(is_image==0){
+            var li = $('<li>');
+            li.append('<div class = div-'+ class_name +'> <p >'+ message +'</p> </div>');
+            li.addClass(class_name);
+            messages.append(li);
+        }else if(is_image==1){
+            var li = $('<li>');
+            li.append(`<div class = div-${class_name} > <img src = ${message}></img> </div> `);
+            li.addClass(class_name);
+            messages.append(li);
+
+        }else{
+            var li = $('<li>');
+            li.append('<div class = div-'+ class_name +'> <p >to be come</p> </div>');
+            li.addClass(class_name);
+            messages.append(li);
+        }
+
     };
 
     socket.on("set-username", function(data){
@@ -125,7 +140,7 @@ var main = function(){
     socket.on('get-list-of-messages', function(list_of_messages){
         console.log('get-list-of-messages')
         list_of_messages.forEach(function(msg){
-            display_message(msg.message, msg.class_name);
+            display_message(msg.message, msg.class_name, msg.is_image);
         });
         $("html, body").animate({ scrollTop: $(document).height() }, 1000);
     });
@@ -139,7 +154,8 @@ var main = function(){
         // li.addClass('received');
         // messages.append(li);
 
-        display_message(data.message, 'received');
+        display_message(data.message, 'received', data.is_image);
+        
     });
 
     // Message SEND Button is clicked 
@@ -149,12 +165,14 @@ var main = function(){
         if(msg_text.val()!=''){
 
             var msg = msg_text.val();
-            display_message(msg, 'sent')
+            display_message(msg, 'sent',0)
+            // var file = document.getElementById("upload").files[0];
             
             // Send the message and receiver's username to 
             data = {
                 'type': receiver.type,
                 'receiver': receiver.name_or_username, 
+                'is_image':0,
                 'message': msg}
             console.log(data);
             socket.emit('send-message', data);
@@ -166,6 +184,29 @@ var main = function(){
             $("html, body").animate({ scrollTop: $(document).height() }, 1000);
         }
     });
+
+    test_bt.addEventListener('click',(event)=>{
+        event.preventDefault()
+        console.log("img sent initialized")
+        var file = document.getElementById("upload").files[0];
+        var reader = new FileReader();
+        reader.onload = function() {
+            var msg_data = reader.result;
+            data = {
+                'type': receiver.type,
+                'receiver' : receiver.name_or_username,
+                'is_image': 1,
+                'message' : msg_data
+            }
+            console.log(msg_data)
+            socket.emit('send-message', data);
+            display_message(msg_data, 'sent',1);
+        };
+        reader.readAsDataURL(file);
+      
+    });
+
+
 
     socket.on('answerToDoesUsernameExists', function(data){
         if (data['answer'] === 'True'){

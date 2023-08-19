@@ -1,5 +1,5 @@
 import socketio
-from src import create_app, User, Messages, Groups, GroupMessages, db, cloudinary_creds
+from src import create_app, User, MessagesNew, Groups, GroupMessages, db, cloudinary_creds
 from flask import request, session
 from flask_socketio import SocketIO
 import flask_login
@@ -37,9 +37,9 @@ def send_contacts(data):
 
     # To list out the name of all users, uncomment the below code:
     # list_of_users = [{'username':user.username, 'name':user.name} for user in User.query.all()]
-    results = db.session.query(Messages).filter(
-        or_(Messages.sender.like(username),
-            Messages.receiver.like(username))
+    results = db.session.query(MessagesNew).filter(
+        or_(MessagesNew.sender.like(username),
+            MessagesNew.receiver.like(username))
     ).all()
     for result in results[::-1]:
         if not (result.sender in [usr['username'] for usr in list_of_users] or\
@@ -93,22 +93,22 @@ def get_existing_messages(receiver):
 
     if receiver['type'] == 'user':
         receiver = receiver['name_or_username']
-        messages = db.session.query(Messages).filter(
+        messages = db.session.query(MessagesNew).filter(
             or_(
                 and_(
-                    Messages.sender.like(sender),
-                    Messages.receiver.like(receiver)
+                    MessagesNew.sender.like(sender),
+                    MessagesNew.receiver.like(receiver)
                 ),
                 and_(
-                    Messages.sender.like(receiver),
-                    Messages.receiver.like(sender)
+                    MessagesNew.sender.like(receiver),
+                    MessagesNew.receiver.like(sender)
                 )
             )
         )
-        list_of_messages = [{'message': message.message, 'class_name': 'sent'}
+        list_of_messages = [{'message': message.message, 'class_name': 'sent' , 'is_image' : message.is_img}
                             if message.sender == sender
                             else
-                            {'message': message.message, 'class_name': 'received'}
+                            {'message': message.message, 'class_name': 'received', 'is_image' : message.is_img}
                             for message in messages]
     
     else:
@@ -118,9 +118,9 @@ def get_existing_messages(receiver):
         messages = GroupMessages.query.filter_by(group_name=name_of_group)
         for message in messages:
             if message.sender == sender:
-                list_of_messages.append({'message': message.message, 'class_name': 'sent'})
+                list_of_messages.append({'message': message.message, 'class_name': 'sent', 'is_image' : message.is_img})
             else:
-                list_of_messages.append({'message': f'{message.sender}: {message.message}', 'class_name': 'received'})
+                list_of_messages.append({'message': f'{message.sender}: {message.message}', 'class_name': 'received', 'is_image' : message.is_img})
     
     socketio.emit('get-list-of-messages', list_of_messages, room=app.config['clients'][sender])
 
@@ -131,10 +131,12 @@ def handle_message(data):
     type = data['type']
     name_or_username = data['receiver']
     message = data['message']
+    isImg = data['is_image']
 
     # Save the message to the database
     if type == 'user':
-        new_message = Messages()
+        new_message = MessagesNew()
+        new_message.is_img = isImg
         new_message.sender = flask_login.current_user.username
         new_message.receiver = name_or_username
         new_message.message = message
@@ -143,7 +145,8 @@ def handle_message(data):
         
         data_to_send = {
             'message'   :   message,
-            'from'    :   flask_login.current_user.username
+            'from'    :   flask_login.current_user.username,
+            'is_image': isImg
         }
         print(f"Data: {data_to_send}")
 
@@ -160,7 +163,8 @@ def handle_message(data):
 
         data_to_send = {
             'message': f'{sender}: {message}',
-            'class_name': 'received'
+            'class_name': 'received',
+            'is_image': isImg
             }
         print(f"Data: {data_to_send}")
         group_members = Groups\
@@ -285,5 +289,5 @@ def show_warning_error(username, title, message):
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    socketio.run(app, port='8080', host='0.0.0.0')
+    socketio.run(app, port='8080', host='localhost', debug = True)
     # socketio.run(app, debug=True)
