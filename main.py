@@ -34,7 +34,7 @@ def send_contacts(data):
     # Send the list of users in the database to the website
     # Prepare the list of users
     list_of_users = []
-
+    
     # To list out the name of all users, uncomment the below code:
     # list_of_users = [{'username':user.username, 'name':user.name} for user in User.query.all()]
     results = db.session.query(MessagesNew).filter(
@@ -58,6 +58,7 @@ def send_contacts(data):
             if valid_user not in list_of_users:
                 list_of_users.append(valid_user)
 
+    # print(list_of_users)
     # Create list_of_groups the user is present in
     list_of_groups = []
     # Query all the groups in the `Group` database table
