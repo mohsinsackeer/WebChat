@@ -204,6 +204,11 @@ form button {
     word-break: break-all;
     max-width: 350px;
 }
+.div-sent img{
+    height:200px;
+    max-width: 200px;
+}
+
 .div-received p{
     margin: 0px;
     margin-left: 10px;
@@ -223,6 +228,11 @@ form button {
     padding-top: 5px;
     padding-bottom: 5px;
 
+}
+
+.div-received img{
+    height:200px;
+    max-width: 200px;
 }
 
 span.sender-username{
