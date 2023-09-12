@@ -1,0 +1,91 @@
+--------------------------------------------------------------------------------------------
+                        DATABASE ARCHITECTURE - uses MongoDB
+--------------------------------------------------------------------------------------------
+
+The name of the database used for the application is "add-db".There will 
+be the following collections in the database:
+    1. Users
+    2. Groups
+    3. OnlineUsers
+    4. UserMessages
+    5. GroupMessages
+
+-------------------
+Collection 1: Users
+-------------------
+    - Will store details about users.
+    - Details Stored: _id, username, name, email_id, pwd (will be in encrypted format), dp_url,
+                      chats (Users and Groups - Latest Chats Always At The End of the Array)
+    - Document Format:
+        {
+            '_id'       : ...,
+            'username'  : ...,
+            'name'      : ...,
+            'email_id'  : ...,
+            'pwd'       : ...,
+            'dp_url'    : ...,
+            'chats'     : [
+                {'is_group': False, 'username': ...},
+                {'is_group': True, 'groupname': ...}
+            ]
+        }
+
+--------------------
+Collection 2: Groups
+--------------------
+    - Will store details about the group chats
+    - Details Stored: _id, groupname (unique to each group - assigned by backend), name, members
+    - Document Format:
+        {
+            '_id'       : ...,
+            'groupname' : ...,
+            'name'      : ...,
+            'members'   : [
+                {'username': ..., 'is_admin': True},
+                {'username': ..., 'is_admin': False}
+            ]
+        }
+
+-------------------------
+Collection 3: OnlineUsers
+-------------------------
+    - Will keep track of all currently online
+    - Detials Stored: _id, username, session_id
+    - Document Format:
+        {
+            '_id'       : ...,
+            'username'  : ...,
+            'session_id': ...,
+        }
+
+--------------------------
+Collection 4: UserMessages
+--------------------------
+    - This collection will store all the DMs
+    - Details stored: _id, unique_chat_code (will be a string -> min(username1,username2)+'-'+max(username1,username2)),
+                      from (ie., username), to (username), is_image, 
+                      text (will store message or url depending on is_image), timestamp (seconds)
+    - Document Format:
+        {
+            '_id': ...,
+            'unique_chat_code': ...,
+            'from': ...,
+            'to': ...,
+            'is_image': ...,
+            'text': ...,
+            'timestamp': ...
+        }
+
+---------------------------
+Collection 5: GroupMessages
+---------------------------
+    - This collection will store all the group messages in the application
+    - Details stored: _id, groupname, from, text, timestamp
+    - Document Format:
+        {
+            '_id': ...,
+            'groupname': ...,
+            'from': ...,
+            'text': ...,
+            'timestamp': ...
+        }

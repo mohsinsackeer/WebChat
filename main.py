@@ -1,12 +1,13 @@
 import socketio
-from src import create_app, User, MessagesNew, Groups, GroupMessages, db, cloudinary_creds
+from src import create_app, User, MessagesNew, Groups, GroupMessages, db, configs
 from flask import request, session
 from flask_socketio import SocketIO
 import flask_login
 from sqlalchemy import or_, and_
 
 app = create_app()
-app.config['SECRET KEY'] = 'ThisTheIsKeySecret'
+# app.config['SECRET KEY'] = 'ThisTheIsKeySecret'
+app.config['SECRET KEY'] = configs.get("FLASK_SECERT_KEY").data
 app.config['clients'] = {}
 socketio = SocketIO(app)
 

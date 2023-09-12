@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, session, request
 from flask_login import login_user, logout_user, login_required
-from src import User, db, cloudinary_creds
-import cloudinary
+from src import User, db
 from cloudinary import uploader
 from cloudinary.utils import cloudinary_url
 
