@@ -24,6 +24,7 @@ def add_client():
     print(f"Event for {flask_login.current_user.username} connect")
     # On connecting, we save the session id for each user
     app.config['clients'][flask_login.current_user.username] = request.sid
+    db.remove_from_online_users(flask_login.current_user.username)
     db.add_to_online_users(flask_login.current_user.username, request.sid)
     
     # print(f'{flask_login.current_user.username}: {request.sid}')
@@ -41,7 +42,7 @@ def add_client():
 def send_contacts(data):
     username = flask_login.current_user.username
 
-    print("Event for {username}: req-list-of-contacts")
+    print(f"Event for {username}: req-list-of-contacts")
     """
     # Send the list of users in the database to the website
     # Prepare the list of users
@@ -92,8 +93,11 @@ def send_contacts(data):
                 list_of_users + list_of_groups,
                 room=app.config['clients'][flask_login.current_user.username])
     """
+    list_of_chats = db.get_list_of_chats(username)
+    print(request.sid, db.get_session_id(username))
+    print(f'List of Chats: {list_of_chats}')
     socketio.emit('get-list-of-contacts',
-                  db.get_list_of_chats(username),
+                  list_of_chats,
                   room=db.get_session_id(username))
     
 
@@ -252,9 +256,9 @@ def does_username_exists(data):
     try:
         # if result.username:
         data = {'answer': 'True',
-                'username': result.username,
-                'name': result.name,
-                'dp_url': result.dp_url}
+                'username': result['username'],
+                'name': result['name'],
+                'dp_url': result['dp_url']}
     except Exception as e:
         print(e)
         data = {'answer': 'False'}

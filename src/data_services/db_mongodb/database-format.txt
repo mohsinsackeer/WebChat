@@ -25,8 +25,8 @@ Collection 1: Users
             'pwd'       : ...,
             'dp_url'    : ...,
             'chats'     : [
-                {'is_group': False, 'username': ...},
-                {'is_group': True, 'groupname': ...}
+                {'type': 'user', 'username': ...},
+                {'type': 'group', 'groupname': ...}
             ]
         }
 

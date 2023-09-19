@@ -57,7 +57,10 @@ class MongoAppDB:
         return None
     
     def get_user(self, username):
-        return self.coll_users.find_one({'username': username})
+        print(f'Called -> get_user({username})')
+        user = self.coll_users.find_one({'username': username})
+        print(user)
+        return user
     
     def does_user_exist(self, username):
         if self.coll_users.find_one({'username': username}, {'username':1}):
@@ -77,10 +80,17 @@ class MongoAppDB:
             return hashlib.sha256(pwd.encode('UTF-8')).hexdigest() == user['pwd']
         return False
 
-    def add_latest_chat(self, username, chatname, isUser):
+    def remove_user_from_chats(self, chats, username):
+        for i,user in enumerate(chats):
+            if user['username'] == username:
+                chats.pop(i)
+                break
+
+    def add_latest_chat_to_list(self, username, chatname, user_type):
         # new_chat = {'chatname': chatname, 'isUser': isUser}
+        print(f'Inside add_latest_chat_to_list: {username}, {chatname}, {user_type}')
         new_chat = {}
-        if isUser:
+        if user_type == 'user':
             chat_user = self.coll_users.find_one({'username': chatname})
             new_chat = {
                     'type': 'user',
@@ -96,13 +106,21 @@ class MongoAppDB:
                 'dp_url': chat_group['dp_url']
             }
         user = self.coll_users.find_one({'username': username})
-        chats = user['chats']
-        chats = set(chats)
-        chats.add(new_chat)
-        chats.remove(new_chat)
-        chats.add(new_chat)
-        user['chats'] = chats
-        self.coll_users.update_one({'username': username}, user)
+        self.remove_user_from_chats(user['chats'], chatname)
+        user['chats'].append(new_chat)
+        # self.coll_users.update_one({'username': username}, user)
+        self.coll_users.update_one({'username': username},
+                                   {'$set': {'chats': user['chats']}})
+    
+    def update_user_chat_list(self, sender, receiver, chat_type):
+        if chat_type == 'user':
+            self.add_latest_chat_to_list(sender, receiver, chat_type)
+            self.add_latest_chat_to_list(receiver, sender, chat_type)
+        else:
+            groupname = receiver
+            members = self.get_group_members(groupname)
+            for member in members:
+                self.add_latest_chat_to_list(member, groupname, chat_type)
     
     def get_list_of_chats(self, username):
         chats = self.coll_users.find_one({'username': username})['chats']
@@ -138,7 +156,7 @@ class MongoAppDB:
         print(f'{username} add to OnlineUsers collection')
     
     def remove_from_online_users(self, username):
-        self.coll_online_users.delete_one({'username': username})
+        self.coll_online_users.delete_many({'username': username})
         print(f'{username} removed from OnlineUsers collection')
     
     def get_session_id(self, username):
@@ -160,6 +178,7 @@ class MongoAppDB:
             'timestamp': time.time()
         }
         self.coll_user_messages.insert_one(message)
+        self.update_user_chat_list(sender, receiver, 'user')
     
     def new_user_message_image(self, sender, receiver, base64data):
         upload_result = uploader.upload(base64data)
@@ -176,17 +195,17 @@ class MongoAppDB:
             'timestamp': time.time()
         }
         self.coll_user_messages.insert_one(message)
+        self.update_user_chat_list(sender, receiver, 'user')
         return url
     
     # chunk_num >= 1
     def get_next_set_of_user_messages(self, chunk_num, username1, username2):
         unique_chat_code = min(username1,username2) + '-' + max(username1, username2)
-        messages = self.coll_user_messages.find({'unique_chat_code': unique_chat_code})\
-                                          .sort({'timestamp': -1})\
+        messages = self.coll_user_messages.find({'unique_chat_code': unique_chat_code}, {'_id':0})\
+                                          .sort('timestamp', -1)\
                                           .skip((chunk_num-1)*100)\
-                                          .limit(100)\
-                                          .reverse()
-        return messages
+                                          .limit(100)
+        return list(messages)[::-1]
     
     """
     Functions for 'GroupMessages' Collection
@@ -200,6 +219,7 @@ class MongoAppDB:
             'timestamp' : time.time()
         }
         self.coll_group_messages.insert_one(message)
+        self.update_user_chat_list(sender, groupname, 'group')
     
     def add_new_group_message_image(self, groupname, sender, url):
         message = {
@@ -210,6 +230,7 @@ class MongoAppDB:
             'timestamp' : time.time()
         }
         self.coll_group_messages.insert_one(message)
+        self.update_user_chat_list(sender, groupname, 'group')
 
     def get_next_set_of_group_messages(self, chunk_num, groupname):
         messages = self.coll_group_messages.find({'groupname': groupname})\

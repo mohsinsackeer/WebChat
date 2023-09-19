@@ -5,7 +5,7 @@ var main = function(){
     var receiver;
     var sender;
     var all_usernames = [];
-    var cloudinary = require('cloudinary').v2;
+    // var cloudinary = require('cloudinary').v2;
     var error_title, error_message;
 
 
@@ -28,6 +28,12 @@ var main = function(){
     var test_bt = document.getElementById('test-bt');
 
     var display_message = function(message, class_name, is_image){
+        msg = {
+            'message': message,
+            'class': class_name,
+            'is_image': is_image
+        };
+        console.log(msg);
         if(!is_image){
             var li = $('<li>');
             li.append('<div class = div-'+ class_name +'> <p >'+ message +'</p> </div>');
@@ -60,15 +66,6 @@ var main = function(){
     })
 
     // hide serarch tab
-    document.getElementById("search-button").on('click', function(){
-        console.log("Search Button Clicked!");
-        if($("#div-search-username").css("display") != "none"){
-            $("#div-search-username").css("display","none");
-        }else{
-            $("#div-search-username").css("display","block");
-        }
-    })
-    
     $("#search-button").on('click', function(){
         console.log("Search Button Clicked!");
         if($("#div-search-username").css("display") != "none"){
@@ -110,7 +107,10 @@ var main = function(){
             // $(".div-chat-name img").addClass("profile-pic");
             $('.messages').empty();
             receiver = {'type': contact.type,
-                        'name_or_username': contact.username};
+                        'name_or_username': contact.username,
+                        'chunk_num': 1};
+            console.log('holaaaa');
+            console.log(receiver);
 
             socket.emit('req-list-of-messages', receiver);
         });
@@ -118,7 +118,7 @@ var main = function(){
 
     // Display the name of all users in the contacts section
     socket.on("get-list-of-contacts", function(list_of_users){
-
+        console.log("Receieved List of Chats!")
         var list = $('#chat-list');
         list.empty();
         var str = "";
@@ -161,13 +161,13 @@ var main = function(){
     socket.on('display-message', function(data){
 
         if (data.from !== receiver.name_or_username) { return; }
-        console.log(data.message);
+        console.log(data.text);
         // var li = $('<li>');
         // li.append('<div class = div-received> <p >'+ data.message +'</p> </div>');
         // li.addClass('received');
         // messages.append(li);
 
-        display_message(data.message, 'received', data.is_image);
+        display_message(data.text, 'received', data.is_image);
         
     });
 
@@ -212,7 +212,7 @@ var main = function(){
                 'is_image': true,
                 'message' : base64data
             }
-            console.log(msg_data);
+            console.log(base64data);
             socket.emit('send-message', data);
             display_message(base64data, 'sent',true);
           }
