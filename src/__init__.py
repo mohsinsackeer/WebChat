@@ -7,7 +7,38 @@ from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import cloudinary_creds
 from src.configuration import configs
+from src.data_services import db
+from src.utils import ChatUser
 
+def create_app():
+    app = Flask(__name__)
+    app.config["SESSION_PERMANENT"] = False
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SECRET KEY'] = 'ThisTheIsKeySecret'
+    login_manager = LoginManager()
+
+    with app.app_context():
+        login_manager = LoginManager()
+        login_manager.login_view = 'auth.login_page'
+        login_manager.init_app(app)
+
+        @login_manager.user_loader
+        def load_user(username):
+            user = db.load_user_by_username(username)
+            if user:
+                return ChatUser(user)
+            return None
+        
+        from src.auth import auth
+        from src.chat import chat
+        
+        app.register_blueprint(auth, url_prefix='/')
+        app.register_blueprint(chat, url_prefix='/')
+
+    # app.config['SECRET KEY'] = 'ThisTheIsKeySecret'
+    return app
+
+"""
 db = SQLAlchemy()
 
 
@@ -110,6 +141,7 @@ def create_app():
         app.register_blueprint(chat, url_prefix='/')
 
     return app
+"""
 
 
 __all__ = [

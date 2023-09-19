@@ -1,13 +1,21 @@
 import socketio
-from src import create_app, User, MessagesNew, Groups, GroupMessages, db, configs
+from src import create_app, db, configs
 from flask import request, session
 from flask_socketio import SocketIO
 import flask_login
-from sqlalchemy import or_, and_
+# from sqlalchemy import or_, and_
+# from src.data_services import create_app
+from src.data_services import db
+import random
+import string
 
 app = create_app()
+# app, db = app_and_mongodb()
 # app.config['SECRET KEY'] = 'ThisTheIsKeySecret'
 app.config['SECRET KEY'] = configs.get("FLASK_SECERT_KEY").data
+app.secret_key = configs.get("FLASK_SECERT_KEY").data
+print(f"Secret Key: {app.config['SECRET KEY']}")
+# app.config['SESSION_TYPE'] = 'filesystem'
 app.config['clients'] = {}
 socketio = SocketIO(app)
 
@@ -16,7 +24,9 @@ def add_client():
     print(f"Event for {flask_login.current_user.username} connect")
     # On connecting, we save the session id for each user
     app.config['clients'][flask_login.current_user.username] = request.sid
-    print(f'{flask_login.current_user.username}: {request.sid}')
+    db.add_to_online_users(flask_login.current_user.username, request.sid)
+    
+    # print(f'{flask_login.current_user.username}: {request.sid}')
     
     # We return the JSON object with the current user's (sender's) username
     data_to_send = {
@@ -24,14 +34,15 @@ def add_client():
         'dp_url': flask_login.current_user.dp_url
     }
     print(f"{flask_login.current_user.username}: {data_to_send}")
-    socketio.emit('set-username', data_to_send, room=app.config['clients'][flask_login.current_user.username])
+    # socketio.emit('set-username', data_to_send, room=app.config['clients'][flask_login.current_user.username])
+    socketio.emit('set-username', data_to_send, room=db.get_session_id(flask_login.current_user.username))
 
 @socketio.on('req-list-of-contacts')
 def send_contacts(data):
     username = flask_login.current_user.username
 
     print("Event for {username}: req-list-of-contacts")
-
+    """
     # Send the list of users in the database to the website
     # Prepare the list of users
     list_of_users = []
@@ -76,23 +87,30 @@ def send_contacts(data):
                 'dp_url': group.dp_url
                 })
     print(f'list-of-contacts for {username}: {list_of_users + list_of_groups}')
+    
     socketio.emit('get-list-of-contacts',
                 list_of_users + list_of_groups,
                 room=app.config['clients'][flask_login.current_user.username])
+    """
+    socketio.emit('get-list-of-contacts',
+                  db.get_list_of_chats(username),
+                  room=db.get_session_id(username))
     
 
 @socketio.on('disconnect')
 def remove_client():
-    print(f"Event for {flask_login.current_user.username}: disconnect")
-    print(f"Username: {flask_login.current_user.username}")
+    username = flask_login.current_user.username
+    print(f"Event for {username}: disconnect")
+    print(f"Username: {username}")
     print(app.config['clients'])
-    app.config['clients'].pop(flask_login.current_user.username)
+    app.config['clients'].pop(username)
+    db.remove_from_online_users(username)
 
 @socketio.on('req-list-of-messages')
 def get_existing_messages(receiver):
     print(f"Event for {flask_login.current_user.username}: req-list-of-messages of {receiver}")
     sender = flask_login.current_user.username
-
+    """
     if receiver['type'] == 'user':
         receiver = receiver['name_or_username']
         messages = db.session.query(MessagesNew).filter(
@@ -125,16 +143,61 @@ def get_existing_messages(receiver):
                 list_of_messages.append({'message': f'{message.sender}: {message.message}', 'class_name': 'received', 'is_image' : message.is_img})
     
     socketio.emit('get-list-of-messages', list_of_messages, room=app.config['clients'][sender])
+    """
+    list_of_messages = []
+    chunk_num = receiver['chunk_num']
+    if receiver['type'] == 'user':
+        list_of_messages = db.get_next_set_of_user_messages(chunk_num, sender, receiver['name_or_username'])
+    else:
+        list_of_messages = db.get_next_set_of_group_messages(chunk_num, receiver['name_or_username'])
+    socketio.emit('get-list-of-messages', list_of_messages, room=db.get_session_id(sender))
 
 @socketio.on('send-message')
 def handle_message(data):
     sender = flask_login.current_user.username
     print(f"Event for {sender}: send-message")
+    
     type = data['type']
-    name_or_username = data['receiver']
+    receiver = data['receiver']
     message = data['message']
     isImg = data['is_image']
-
+    
+    if type == 'user':
+        data = {
+            'from'      : sender,
+            'to'        : receiver,
+            'is_image'  : isImg,
+            'text'      : message
+        }
+        if isImg:
+            url = db.new_user_message_image(sender, receiver, message)
+            data['text'] = url
+        else:
+            db.new_user_message(sender, receiver, message)
+        receiver_session_id = db.get_session_id(receiver)
+        if receiver_session_id:
+            socketio.emit('display-message', data, room=receiver_session_id)
+    else:
+        db.new_group_message(sender, message)
+        data = {
+            'groupname': receiver,
+            'from'     : sender,
+            'text'     : f'{sender}: {message}',
+            'is_image' : False
+        }
+        # if isImg:
+        #     db.new_group_message(sender, message)
+        # else:
+        #     db.new_group_message(receiver, sender, message)
+        members = db.get_group_members(receiver)
+        for member in members:
+            if member == sender:
+                continue
+            receiver_session_id = db.get_session_id(member)
+            if receiver_session_id:
+                socketio.emit('display-message', data, room=receiver_session_id)
+    
+    """
     # Save the message to the database
     if type == 'user':
         new_message = MessagesNew()
@@ -177,25 +240,27 @@ def handle_message(data):
         for member in group_members:
             if member in app.config['clients'] and member!=sender:
                 socketio.emit('display-message', data_to_send, room=app.config['clients'][member])
+    """
+    
 
 @socketio.on('doesUsernameExists')
 def does_username_exists(data):
     user_name = data['username']
-    result = User.query.filter_by(username=f'{user_name}').first()
+    # result = User.query.filter_by(username=f'{user_name}').first()
     # result = User.query.filter_by(username='Jogn')
+    result = db.get_user(user_name)
     try:
-        if result.username:
-            data = {'answer': 'True',
-                    'username': result.username,
-                    'name': result.name,
-                    'dp_url': result.dp_url}
+        # if result.username:
+        data = {'answer': 'True',
+                'username': result.username,
+                'name': result.name,
+                'dp_url': result.dp_url}
     except Exception as e:
         print(e)
         data = {'answer': 'False'}
     print(data)
-    socketio.emit('answerToDoesUsernameExists',
-                data,
-                room=app.config['clients'][flask_login.current_user.username])
+    # socketio.emit('answerToDoesUsernameExists',data,room=app.config['clients'][flask_login.current_user.username])
+    socketio.emit('answerToDoesUsernameExists',data,room=db.get_session_id(flask_login.current_user.username))
 
 @socketio.on('create-new-group')
 def create_new_group(data):
@@ -204,8 +269,10 @@ def create_new_group(data):
     admins = data['admins']
     username = flask_login.current_user.username
 
-    members = [member.strip() for member in members.split(',') if isUserExists(member.strip())]
-    admins = [admin.strip() for admin in admins.split(',') if isUserExists(admin.strip())]
+    # members = [member.strip() for member in members.split(',') if isUserExists(member.strip())]
+    members = [member.strip() for member in members.split(',') if db.does_user_exist(member.strip())]
+    # admins = [admin.strip() for admin in admins.split(',') if isUserExists(admin.strip())]
+    admins = [admin.strip() for admin in admins.split(',') if db.does_user_exist(admin.strip())]
     # if sender not in members:
     #     members.append(sender)
 
@@ -261,24 +328,27 @@ def create_new_group(data):
         members = ",".join(members)
         admins = ",".join(admins)
 
-        group = Groups()
-        group.name = name
-        group.members = members
-        group.admins = admins
-        group.dp_url = 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png'
-        db.session.add(group)
-        db.session.commit()
+        # group = Groups()
+        # group.name = name
+        # group.members = members
+        # group.admins = admins
+        # group.dp_url = 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png'
+        # db.session.add(group)
+        # db.session.commit()
 
+        # Unique ID
+        groupname = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=64))
+        dp_url = 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png'
+        db.create_new_group(groupname, name, dp_url, members, admins)
 
-    socketio.emit('group-created',
-                'Success',
-                room=app.config['clients'][username])
+        socketio.emit('group-created','Success',room=db.get_session_id(username))
 
 def isUserExists(username):
-    results = User.query.filter_by(username=username).first()
-    if results:
-        return True
-    return False
+    return db.does_user_exist(username)
+    # results = User.query.filter_by(username=username).first()
+    # if results:
+    #     return True
+    # return False
 
 def show_warning_error(username, title, message):
     data_to_send = {
@@ -287,7 +357,7 @@ def show_warning_error(username, title, message):
     }
     socketio.emit('warning-or-error',
                 data_to_send,
-                room=app.config['clients'][username])
+                room=db.get_session_id(username))
 
 if __name__ == '__main__':
     # app.run(debug=True)

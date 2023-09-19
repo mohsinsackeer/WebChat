@@ -1,13 +1,17 @@
 import pymongo
 import time
+import hashlib
+
+from src.configuration import configs
+from cloudinary import uploader
+from cloudinary.utils import cloudinary_url
 
 class MongoAppDB:
-    """
-    AppDB uses all the 3 databases, and can perform all the database 
-    operations of the application.
-    """
+    
     def __init__(self, host='localhost', port=27017) -> None:
-        CONN_STRING = 'mongo://' + host.strip('/') + '/' + str(port) + '/'
+        CONN_STRING = 'mongodb://' + host.strip('/') + '/' + str(port)
+        print(f'Conn String: {CONN_STRING}')
+        # CONN_STRING = configs.get("MONGODB_DB_STRING").data
         DB_NAME = "app-db"
         COLLECTION_USERS_NAME = "Users"
         COLLECTION_GROUPS_NAME = "Groups"
@@ -34,60 +38,114 @@ class MongoAppDB:
     """
     Functions for 'Users' Collection
     """
-    def add_new_user(self, username, name, email_id, pwd, dp_url):
+    def create_new_user(self, username, name, email_id, pwd, dp_url):
         user = {
             'username'  : username,
             'name'      : name,
             'email_id'  : email_id,
-            'pwd'       : pwd,
+            'pwd'       : hashlib.sha256(pwd.encode('UTF-8')).hexdigest(),
             'dp_url'    : dp_url,
             'chats'     : []
         }
         self.coll_users.insert_one(user)
     
     # For Flask Login Manager
-    def load_user(self, user_id):
-        return self.coll_users.find_one({'_id': user_id})
+    def load_user_by_username(self, username):
+        user = self.coll_users.find_one({'username': username})
+        if user:
+            return user
+        return None
     
     def get_user(self, username):
         return self.coll_users.find_one({'username': username})
     
+    def does_user_exist(self, username):
+        if self.coll_users.find_one({'username': username}, {'username':1}):
+            return True
+        return False
+
+    def is_email_already_used(self, email):
+        if self.coll_users.find_one({'email': email}, {'username': 1}):
+            return True
+        return False
+    
     def validate_pwd(self, username, pwd):
         user = self.coll_users.find_one({'username': username}, {'pwd': 1})
+        print(user)
         if user:
-            return pwd == user['pwd']
+            print(pwd)
+            return hashlib.sha256(pwd.encode('UTF-8')).hexdigest() == user['pwd']
         return False
+
+    def add_latest_chat(self, username, chatname, isUser):
+        # new_chat = {'chatname': chatname, 'isUser': isUser}
+        new_chat = {}
+        if isUser:
+            chat_user = self.coll_users.find_one({'username': chatname})
+            new_chat = {
+                    'type': 'user',
+                    'username': chatname,
+                    'name': chat_user['name'],
+                    'dp_url': chat_user['dp_url']}
+        else:
+            chat_group = self.coll_groups.find_one({'groupname': chatname})
+            new_chat = {
+                'type': 'group',
+                'username': chatname,
+                'name': chat_group['name'],
+                'dp_url': chat_group['dp_url']
+            }
+        user = self.coll_users.find_one({'username': username})
+        chats = user['chats']
+        chats = set(chats)
+        chats.add(new_chat)
+        chats.remove(new_chat)
+        chats.add(new_chat)
+        user['chats'] = chats
+        self.coll_users.update_one({'username': username}, user)
+    
+    def get_list_of_chats(self, username):
+        chats = self.coll_users.find_one({'username': username})['chats']
+        return chats[::-1]
 
     """
     Functions for 'Groups' Collection
     """
-    def add_new_group(self, groupname, name, member, admins):
+    def create_new_group(self, groupname, name, dp_url, members, admins):
         group = {
             'groupname'     : groupname,
             'name'          : name,
+            'dp_url'        : dp_url,
             'members'       : [],
         }
-        for username in member:
+        for username in members:
             if username in admins:
                 group['members'].append({'username': username, 'is_admin': True})
             else:
                 group['members'].append({'username': username, 'is_admin': False})
         self.coll_groups.insert_one(group)
     
+    def get_group_members(self, groupname):
+        group = self.coll_groups.find_one({'groupname': groupname})
+        members = group['members']
+        return [member['username'] for member in members]
+    
     """
     Functions for 'OnlineUsers' Collection
     """
-    def add_to_online_user(self, username, session_id):
+    def add_to_online_users(self, username, session_id):
         self.coll_online_users.insert_one({'username': username, 'session_id': session_id})
         print(f'{username} add to OnlineUsers collection')
     
-    def remove_from_online_user(self, username):
+    def remove_from_online_users(self, username):
         self.coll_online_users.delete_one({'username': username})
         print(f'{username} removed from OnlineUsers collection')
     
     def get_session_id(self, username):
         user = self.coll_online_users.find_one({'username': username})
-        return user['session_id']
+        if user:
+            return user['session_id']
+        return None
     
     """
     Functions for 'UserMessages' Collection
@@ -103,7 +161,12 @@ class MongoAppDB:
         }
         self.coll_user_messages.insert_one(message)
     
-    def new_user_message_image(self, sender, receiver, url):
+    def new_user_message_image(self, sender, receiver, base64data):
+        upload_result = uploader.upload(base64data)
+        url, options = cloudinary_url(
+            upload_result['public_id'],
+            crop="fill"
+        )
         message = {
             'unique_chat_code': min(sender, receiver) + '-' + max(sender,receiver),
             'from': sender,
@@ -113,7 +176,9 @@ class MongoAppDB:
             'timestamp': time.time()
         }
         self.coll_user_messages.insert_one(message)
+        return url
     
+    # chunk_num >= 1
     def get_next_set_of_user_messages(self, chunk_num, username1, username2):
         unique_chat_code = min(username1,username2) + '-' + max(username1, username2)
         messages = self.coll_user_messages.find({'unique_chat_code': unique_chat_code})\
@@ -130,12 +195,23 @@ class MongoAppDB:
         message = {
             'groupname' : groupname,
             'from'      : sender,
-            'text'      : text,
+            'text'      : f'{sender}: {text}',
+            'is_image'  : False,
+            'timestamp' : time.time()
+        }
+        self.coll_group_messages.insert_one(message)
+    
+    def add_new_group_message_image(self, groupname, sender, url):
+        message = {
+            'groupname' : groupname,
+            'from'      : sender,
+            'text'      : url,
+            'is_image'  : True,
             'timestamp' : time.time()
         }
         self.coll_group_messages.insert_one(message)
 
-    def get_next_of_group_messages(self, chunk_num, groupname):
+    def get_next_set_of_group_messages(self, chunk_num, groupname):
         messages = self.coll_group_messages.find({'groupname': groupname})\
                                             .sort({'timestamp': -1})\
                                             .skip((chunk_num-1)*100)\

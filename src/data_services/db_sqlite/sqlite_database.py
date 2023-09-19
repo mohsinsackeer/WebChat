@@ -6,6 +6,7 @@ from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from src.auth import auth
 from src.chat import chat
+from sqlite_utils import SQL_Utils
 
 db = SQLAlchemy()
 
@@ -66,7 +67,7 @@ class GroupMessages(db.Model):
     time = db.Column(db.DateTime(timezone=True), default=datetime.now(tz=ZoneInfo('Asia/Kolkata')))
 
 
-def create_app_and_database(app):
+def app_and_sqlite(app):
     curr_dir = os.getcwd()
     database_path = os.path.join(curr_dir, 'src/database/db_sqlite/db.sqlite')
     print(f'Database Path: {database_path}')
@@ -93,4 +94,4 @@ def create_app_and_database(app):
         app.register_blueprint(auth, url_prefix='/')
         app.register_blueprint(chat, url_prefix='/')
     
-    return app, db
+    return app, SQL_Utils(db)

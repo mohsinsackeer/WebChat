@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "cloudinary": "^1.40.0"
   }
 }

@@ -1,4 +1,3 @@
-
 var main = function(){
     console.log('chat.js is active!');
 
@@ -6,7 +5,7 @@ var main = function(){
     var receiver;
     var sender;
     var all_usernames = [];
-
+    var cloudinary = require('cloudinary').v2;
     var error_title, error_message;
 
 
@@ -29,25 +28,26 @@ var main = function(){
     var test_bt = document.getElementById('test-bt');
 
     var display_message = function(message, class_name, is_image){
-        if(is_image==0){
+        if(!is_image){
             var li = $('<li>');
             li.append('<div class = div-'+ class_name +'> <p >'+ message +'</p> </div>');
             li.addClass(class_name);
             messages.append(li);
-        }else if(is_image==1){
+        }else{
             var li = $('<li>');
             li.append(`<div class = div-${class_name} > <img src = ${message}></img> </div> `);
             li.addClass(class_name);
             messages.append(li);
 
-        }else{
-            var li = $('<li>');
-            li.append('<div class = div-'+ class_name +'> <p >to be come</p> </div>');
-            li.addClass(class_name);
-            messages.append(li);
         }
+        // else{
+        //     var li = $('<li>');
+        //     li.append('<div class = div-'+ class_name +'> <p >to be come</p> </div>');
+        //     li.addClass(class_name);
+        //     messages.append(li);
+        // }
 
-    };
+    }
 
     socket.on("set-username", function(data){
         sender = data.sender;
@@ -57,16 +57,25 @@ var main = function(){
         $("#contacts-section > div.contacts-header > span").text(sender);
         $("#contacts-section > div.contacts-header > div.image-holder").append('<div class = demo-image><img src = "'+data.dp_url+'"  alt="contact_image"></div>')
         $(".btn-group").show();
-    });
+    })
 
     // hide serarch tab
-
+    document.getElementById("search-button").on('click', function(){
+        console.log("Search Button Clicked!");
+        if($("#div-search-username").css("display") != "none"){
+            $("#div-search-username").css("display","none");
+        }else{
+            $("#div-search-username").css("display","block");
+        }
+    })
+    
     $("#search-button").on('click', function(){
-            if($("#div-search-username").css("display") != "none"){
-                $("#div-search-username").css("display","none");
-            }else{
-                $("#div-search-username").css("display","block");
-            }
+        console.log("Search Button Clicked!");
+        if($("#div-search-username").css("display") != "none"){
+            $("#div-search-username").css("display","none");
+        }else{
+            $("#div-search-username").css("display","block");
+        }
     })
 
     var insertContact = function(contact){
@@ -83,7 +92,7 @@ var main = function(){
         var div = $('<div>');
         div.addClass("contacts-listitem");
         div.prepend('<div class = demo-image><img src = "'+contact.dp_url+'"  alt="contact_image"></div>'); //to be changed later
-        div.append('<span >'+ contact.name +'</span>');
+        div.append('<span>'+ contact.name +'</span>');
         li.append(div);
         li.addClass(contact.username);
         list.append(li);
@@ -140,7 +149,11 @@ var main = function(){
     socket.on('get-list-of-messages', function(list_of_messages){
         console.log('get-list-of-messages')
         list_of_messages.forEach(function(msg){
-            display_message(msg.message, msg.class_name, msg.is_image);
+            if (msg.from == sender){
+                display_message(msg.text, 'sent', msg.is_image);
+            } else {
+                display_message(msg.text, 'received', msg.is_image);
+            }
         });
         $("html, body").animate({ scrollTop: $(document).height() }, 1000);
     });
@@ -163,9 +176,8 @@ var main = function(){
         event.preventDefault();
 
         if(msg_text.val()!=''){
-
             var msg = msg_text.val();
-            display_message(msg, 'sent',0)
+            display_message(msg, 'sent', false);
             // var file = document.getElementById("upload").files[0];
             
             // Send the message and receiver's username to 
@@ -190,19 +202,21 @@ var main = function(){
         console.log("img sent initialized")
         var file = document.getElementById("upload").files[0];
         var reader = new FileReader();
-        reader.onload = function() {
-            var msg_data = reader.result;
+        reader.readAsDataURL(file);
+        reader.onloadend = function() {
+            // var msg_data = reader.result;
+            var base64data = reader.result;
             data = {
                 'type': receiver.type,
                 'receiver' : receiver.name_or_username,
-                'is_image': 1,
-                'message' : msg_data
+                'is_image': true,
+                'message' : base64data
             }
-            console.log(msg_data)
+            console.log(msg_data);
             socket.emit('send-message', data);
-            display_message(msg_data, 'sent',1);
-        };
-        reader.readAsDataURL(file);
+            display_message(base64data, 'sent',true);
+          }
+        // reader.onload = function() {};
       
     });
 
