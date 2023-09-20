@@ -236,6 +236,5 @@ class MongoAppDB:
         messages = self.coll_group_messages.find({'groupname': groupname})\
                                             .sort({'timestamp': -1})\
                                             .skip((chunk_num-1)*100)\
-                                            .limit(100)\
-                                            .reverse()
-        return messages
+                                            .limit(100)
+        return list(messages)[::-1]
