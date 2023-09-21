@@ -106,7 +106,9 @@ class MongoAppDB:
                 'dp_url': chat_group['dp_url']
             }
         user = self.coll_users.find_one({'username': username})
-        self.remove_user_from_chats(user['chats'], chatname)
+        print(username, user)
+        if chatname in user['chats']:
+            self.remove_user_from_chats(user['chats'], chatname)
         user['chats'].append(new_chat)
         # self.coll_users.update_one({'username': username}, user)
         self.coll_users.update_one({'username': username},
@@ -119,7 +121,9 @@ class MongoAppDB:
         else:
             groupname = receiver
             members = self.get_group_members(groupname)
+            print(f'Return val from get_group_members - {members}')
             for member in members:
+                print(f'Checkpoint 2 - {member}')
                 self.add_latest_chat_to_list(member, groupname, chat_type)
     
     def get_list_of_chats(self, username):
@@ -130,6 +134,9 @@ class MongoAppDB:
     Functions for 'Groups' Collection
     """
     def create_new_group(self, groupname, name, dp_url, members, admins):
+        print(f'Inside create_new_group: Members-{members} and Admins-{admins}')
+        members = list(members.strip().split(','))
+        admins = list(admins.strip().split(','))
         group = {
             'groupname'     : groupname,
             'name'          : name,
@@ -137,11 +144,15 @@ class MongoAppDB:
             'members'       : [],
         }
         for username in members:
+            username = username.strip()
+            print(f'Inside Loop: {username}')
             if username in admins:
                 group['members'].append({'username': username, 'is_admin': True})
             else:
                 group['members'].append({'username': username, 'is_admin': False})
         self.coll_groups.insert_one(group)
+        print("Checkpoint 1")
+        self.update_user_chat_list(None, groupname, 'group')
     
     def get_group_members(self, groupname):
         group = self.coll_groups.find_one({'groupname': groupname})
