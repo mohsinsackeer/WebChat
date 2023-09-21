@@ -27,13 +27,42 @@ var main = function(){
     var messages = $('#messages');
     var test_bt = document.getElementById('test-bt');
 
+    var display_load_older_messages_btn = function(type, username, chunk_num){
+        var li = $('<li>');
+        li.append("<a href='#' id='loadOlder'>Load Older Messages</a>");
+        messages.append(li);
+
+        $("#loadOlder").on("click", function(){
+            data = {
+                'type'              : type,
+                'name_or_username'  : username,
+                'chunk_num'         : chunk_num+1
+            };
+            socket.emit('req-list-of-messages', data);
+        });
+    }
+
+    var display_load_newer_messages_btn = function(type, username, chunk_num){
+        var li = $('<li>');
+        li.append("<a href='#' id='loadNewer' data-chunk" + chunk_num + ">Load Newer Messages</a>");
+        messages.append(li);
+
+        $('#loadNewer').on('click', function(){
+            data = {
+                'type'              : type,
+                'name_or_username'  : username,
+                'chunk_num'         : chunk_num-1
+            };
+            socket.emit('req-list-of-messages', data);
+        });
+    }
+
     var display_message = function(message, class_name, is_image){
         msg = {
             'message': message,
             'class': class_name,
             'is_image': is_image
         };
-        console.log(msg);
         if(!is_image){
             var li = $('<li>');
             li.append('<div class = div-'+ class_name +'> <p >'+ message +'</p> </div>');
@@ -147,15 +176,26 @@ var main = function(){
     });
 
     socket.on('get-list-of-messages', function(list_of_messages){
-        console.log('get-list-of-messages')
+        console.log('get-list-of-messages');
+        $('.messages').empty();
         list_of_messages.forEach(function(msg){
+            if (msg.hasOwnProperty('load_button_type')){
+                if (msg.load_button_type == 'older'){
+                    display_load_older_messages_btn(msg.type, msg.name_or_username, msg.chunk_num);
+                } else{
+                    display_load_newer_messages_btn(msg.type, msg.name_or_username, msg.chunk_num);
+                }
+                return;
+            }
             if (msg.from == sender){
                 display_message(msg.text, 'sent', msg.is_image);
             } else {
                 display_message(msg.text, 'received', msg.is_image);
             }
         });
-        $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+        // $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+        $('.div-chat-window').scrollTop($('.div-chat-window')[0].scrollHeight);
+        // console.log($('.div-chat-window')[0].scrollHeight);
     });
 
     socket.on('display-message', function(data){
@@ -217,7 +257,7 @@ var main = function(){
             display_message(base64data, 'sent',true);
           }
         // reader.onload = function() {};
-      
+        
     });
 
 

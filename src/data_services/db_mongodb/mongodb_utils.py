@@ -200,11 +200,12 @@ class MongoAppDB:
     
     # chunk_num >= 1
     def get_next_set_of_user_messages(self, chunk_num, username1, username2):
+        message_limit_per_screen = int(configs.get("MESSAGE_LIMIT_PER_SCREEN").data)
         unique_chat_code = min(username1,username2) + '-' + max(username1, username2)
         messages = self.coll_user_messages.find({'unique_chat_code': unique_chat_code}, {'_id':0})\
                                           .sort('timestamp', -1)\
-                                          .skip((chunk_num-1)*100)\
-                                          .limit(100)
+                                          .skip((chunk_num-1)*message_limit_per_screen)\
+                                          .limit(message_limit_per_screen)
         return list(messages)[::-1]
     
     """
@@ -233,8 +234,9 @@ class MongoAppDB:
         self.update_user_chat_list(sender, groupname, 'group')
 
     def get_next_set_of_group_messages(self, chunk_num, groupname):
+        message_limit_per_screen = int(configs.get("MESSAGE_LIMIT_PER_SCREEN").data)
         messages = self.coll_group_messages.find({'groupname': groupname})\
                                             .sort({'timestamp': -1})\
-                                            .skip((chunk_num-1)*100)\
-                                            .limit(100)
+                                            .skip((chunk_num-1)*message_limit_per_screen)\
+                                            .limit(message_limit_per_screen)
         return list(messages)[::-1]

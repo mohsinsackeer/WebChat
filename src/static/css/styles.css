@@ -355,3 +355,23 @@ table{
 .img-upload{
     width: 100%;
 }
+
+#loadOlder, #loadNewer {
+    width: 200px;
+    color: #fff;
+    display: block;
+    text-align: center;
+    margin: 20px auto;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background-color: blue;
+    transition: .3s;
+  }
+
+#loadOlder:hover, #loadNewer:hover{
+color: blue;
+background-color: #fff;
+border: 1px solid blue;
+text-decoration: none;
+}

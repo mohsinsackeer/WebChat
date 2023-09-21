@@ -154,6 +154,24 @@ def get_existing_messages(receiver):
         list_of_messages = db.get_next_set_of_user_messages(chunk_num, sender, receiver['name_or_username'])
     else:
         list_of_messages = db.get_next_set_of_group_messages(chunk_num, receiver['name_or_username'])
+    message_limit_per_screen = int(configs.get("MESSAGE_LIMIT_PER_SCREEN").data)
+    print(f'message_limit_per_screen: {message_limit_per_screen}')
+    if len(list_of_messages) == message_limit_per_screen:
+        load_older = {
+            'load_button_type'  : 'older',
+            'type'              : receiver['type'],
+            'name_or_username'  : receiver['name_or_username'],
+            'chunk_num'         : chunk_num
+        }
+        list_of_messages.insert(0, load_older)
+    if chunk_num > 1:
+        load_newer = {
+            'load_button_type'  : 'newer',
+            'type'              : receiver['type'],
+            'name_or_username'  : receiver['name_or_username'],
+            'chunk_num'         : chunk_num
+        }
+        list_of_messages.append(load_newer)
     socketio.emit('get-list-of-messages', list_of_messages, room=db.get_session_id(sender))
 
 @socketio.on('send-message')
