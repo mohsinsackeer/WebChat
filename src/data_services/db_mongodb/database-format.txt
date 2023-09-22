@@ -25,8 +25,8 @@ Collection 1: Users
             'pwd'       : ...,
             'dp_url'    : ...,
             'chats'     : [
-                {'type': 'user', 'username': ...},
-                {'type': 'group', 'groupname': ...}
+                {'type': 'user', 'username': ..., 'name': ..., 'dp_url': ...},
+                {'type': 'group', 'groupname': ..., 'name': ..., 'dp_url': ...}
             ]
         }
 

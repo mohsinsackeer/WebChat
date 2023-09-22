@@ -156,6 +156,12 @@ def get_existing_messages(receiver):
         list_of_messages = db.get_next_set_of_group_messages(chunk_num, receiver['name_or_username'])
     message_limit_per_screen = int(configs.get("MESSAGE_LIMIT_PER_SCREEN").data)
     print(f'message_limit_per_screen: {message_limit_per_screen}')
+    if receiver['type'] == 'group':
+        for i,msg in enumerate(list_of_messages):
+            N = len(sender)
+            if msg['text'][:N+2] == sender + ': ':
+                list_of_messages[i]['text'] = msg['text'][N+2:]
+        
     if len(list_of_messages) == message_limit_per_screen:
         load_older = {
             'load_button_type'  : 'older',
@@ -200,9 +206,10 @@ def handle_message(data):
         if receiver_session_id:
             socketio.emit('display-message', data, room=receiver_session_id)
     else:
-        db.new_group_message(sender, message)
+        groupname = receiver
+        db.add_new_group_message(groupname, sender, message)
         data = {
-            'groupname': receiver,
+            'groupname': groupname,
             'from'     : sender,
             'text'     : f'{sender}: {message}',
             'is_image' : False

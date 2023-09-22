@@ -80,11 +80,12 @@ class MongoAppDB:
             return hashlib.sha256(pwd.encode('UTF-8')).hexdigest() == user['pwd']
         return False
 
-    def remove_user_from_chats(self, chats, username):
-        for i,user in enumerate(chats):
-            if user['username'] == username:
+    def remove_user_from_chats(self, chats, chatname, chat_type):
+        for i in range(len(chats)-1, -1, -1):
+            if chats[i]['username'] == chatname:
                 chats.pop(i)
                 break
+            
 
     def add_latest_chat_to_list(self, username, chatname, user_type):
         # new_chat = {'chatname': chatname, 'isUser': isUser}
@@ -96,7 +97,8 @@ class MongoAppDB:
                     'type': 'user',
                     'username': chatname,
                     'name': chat_user['name'],
-                    'dp_url': chat_user['dp_url']}
+                    'dp_url': chat_user['dp_url']
+                    }
         else:
             chat_group = self.coll_groups.find_one({'groupname': chatname})
             new_chat = {
@@ -107,8 +109,7 @@ class MongoAppDB:
             }
         user = self.coll_users.find_one({'username': username})
         print(username, user)
-        if chatname in user['chats']:
-            self.remove_user_from_chats(user['chats'], chatname)
+        self.remove_user_from_chats(user['chats'], chatname, user_type)
         user['chats'].append(new_chat)
         # self.coll_users.update_one({'username': username}, user)
         self.coll_users.update_one({'username': username},
@@ -246,8 +247,8 @@ class MongoAppDB:
 
     def get_next_set_of_group_messages(self, chunk_num, groupname):
         message_limit_per_screen = int(configs.get("MESSAGE_LIMIT_PER_SCREEN").data)
-        messages = self.coll_group_messages.find({'groupname': groupname})\
-                                            .sort({'timestamp': -1})\
+        messages = self.coll_group_messages.find({'groupname': groupname}, {'_id':0})\
+                                            .sort('timestamp', -1)\
                                             .skip((chunk_num-1)*message_limit_per_screen)\
                                             .limit(message_limit_per_screen)
         return list(messages)[::-1]
