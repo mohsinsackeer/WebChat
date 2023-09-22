@@ -27,6 +27,26 @@ var main = function(){
     var messages = $('#messages');
     var test_bt = document.getElementById('test-bt');
 
+    var modal = document.getElementById('image-modal');
+
+    var modalClose = document.getElementById('image-modal-close');
+    modalClose.addEventListener('click', function() { 
+        modal.style.display = "none";
+    });
+
+    // global handler
+    document.addEventListener('click', function (e) { 
+    if (e.target.className.indexOf('image-modal-target') !== -1) {
+        var img = e.target;
+        var modalImg = document.getElementById("image-modal-content");
+        // var captionText = document.getElementById("image-modal-caption");
+        modal.style.display = "block";
+        modalImg.src = img.src;
+        // captionText.innerHTML = img.alt;
+    }
+    });
+
+
     var display_load_older_messages_btn = function(type, username, chunk_num){
         var li = $('<li>');
         li.append("<a href='#' id='loadOlder'>Load Older Messages</a>");
@@ -70,7 +90,7 @@ var main = function(){
             messages.append(li);
         }else{
             var li = $('<li>');
-            li.append(`<div class = div-${class_name} > <img src = ${message}></img> </div> `);
+            li.append(`<div class = div-${class_name} > <img class="image-modal-target" src=${message}></img> </div> `);
             li.addClass(class_name);
             messages.append(li);
 
