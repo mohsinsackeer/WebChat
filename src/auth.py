@@ -1,9 +1,14 @@
+import json
+from bson import json_util
 from flask import Blueprint, render_template, redirect, url_for, session, request
+import flask_login
+from flask_login import UserMixin
 from flask_login import login_user, logout_user, login_required
-from src import User, db, cloudinary_creds
-import cloudinary
 from cloudinary import uploader
 from cloudinary.utils import cloudinary_url
+# from src.data_services.db_mongodb import M
+from src import db
+from src.utils import ChatUser
 
 auth = Blueprint('auth', __name__)
 
@@ -34,16 +39,29 @@ def login_submit():
         return render_template('auth/login_page.html',
                                error_msg=error_msg)
 
-    user = User.query.filter_by(username=username).first()
-    if user is None or not user.check_password(entered_password):
+    # user = User.query.filter_by(username=username).first()
+    # if user is None or not user.check_password(entered_password):
+    #     error_msg = 'Your username-password combination does not match. Try Again!'
+    #     return render_template('auth/login_page.html',
+    #                             error_msg=error_msg)
+    
+    login_successful = db.validate_pwd(username, entered_password)
+    print(login_successful)
+    if not login_successful:
         error_msg = 'Your username-password combination does not match. Try Again!'
         return render_template('auth/login_page.html',
                                 error_msg=error_msg)
     
-    session.pop('username', None)
-    login_user(user, remember=remember)
-    session['username'] = username
+    # user = json.loads(json_util.dumps(db.get_user(username)))
+    user = db.get_user(username)
+    
+    # session.pop('username', None)
+    login_user(ChatUser(user), remember=remember)
+    # session['username'] = username
+    db.remove_from_online_users(username)
+    # db.add_to_online_users(username,request.sid)
     #return 'Success'
+    print('Currently Here')
     return redirect(url_for('chat.chats'))
 
 
@@ -61,12 +79,14 @@ def signup_submit():
         return render_template('auth/signup_page.html',
                                 error_msg=error_msg)
 
-    if User.query.filter_by(username=username).count() == 1:
+    # if User.query.filter_by(username=username).count() == 1:
+    if db.does_user_exist(username):
         error_msg = 'Username is already taken! Please try another username.'
         return render_template('auth/signup_page.html',
                                 error_msg=error_msg)
     
-    if User.query.filter_by(email=email).count() == 1:
+    # if User.query.filter_by(email=email).count() == 1:
+    if db.is_email_already_used(email):
         error_msg = "Email already taken. Please try again!"
         return render_template('auth/signup_page.html',
                                 error_msg=error_msg)
@@ -80,22 +100,24 @@ def signup_submit():
     else:
         dp_url = 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png'
     print(dp_url)
-    u = User()
-    u.name = name
-    u.username = username
-    u.email = email
-    u.set_password(password)
-    u.dp_url = dp_url
-    session.pop('username', None)
-    db.session.add(u)
-    db.session.commit()
-    login_user(u)
-    session['username'] = username
+    # u = User()
+    # u.name = name
+    # u.username = username
+    # u.email = email
+    # u.set_password(password)
+    # u.dp_url = dp_url
+    # session.pop('username', None)
+    # db.session.add(u)
+    # db.session.commit()
+    # login_user(u)
+    # session['username'] = username
+    db.create_new_user(username, name, email, password, dp_url)
     return redirect(url_for('chat.chats'))
 
 @auth.route('/logout')
 @login_required
 def logout():
+    db.remove_from_online_users(flask_login.current_user.username)
     logout_user()
-    session.pop('username', None)
+    # session.pop('username', None)
     return redirect(url_for('auth.login_page'))
