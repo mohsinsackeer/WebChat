@@ -3,18 +3,25 @@ import styled from "styled-components";
 
 const ListItemStyle = styled.div`
   width: 100%;
-  height: 50px;
+  height: 72px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  border-bottom: solid 1px ${COLORS.LIGHT_GREY};
+  border-bottom: solid 1px ${COLORS.BORDER};
+  &:hover {
+    background-color: ${COLORS.HOVER};
+  }
   .profile-pic {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 100%;
   }
   .contact {
     width: calc(100% - 150px);
+    font-size: 17px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
   }
   .notification-div {
     display: flex;
